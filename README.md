@@ -6,7 +6,6 @@ Protect your micropayment API calls with instant, cryptographically-verified ref
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![x402 Protocol](https://img.shields.io/badge/x402-Compatible-blue)](https://github.com/coinbase/x402)
-[![A2A Protocol](https://img.shields.io/badge/A2A-Discoverable-green)](https://github.com/coinbase/agentkit)
 
 ## Status
 
@@ -32,8 +31,8 @@ Pay a 1% premium → Get coverage (up to $0.1 USDC per claim) → If merchant fa
 ✅ **1% Percentage Premium** - Pay only 1% of your coverage amount
 ✅ **Up to 100x Protection** - Get 100% coverage for just 1% cost
 ✅ **Instant USDC Refunds** - Get your money back in 15-30 seconds
-✅ **Zero-Knowledge Proofs** - Fraud verification using zkEngine (Nova/Arecibo SNARKs)
-✅ **Agent Discoverable** - Full A2A and x402 Bazaar compatibility
+✅ **Zero-Knowledge Proofs** - Fraud verification using zkEngine SNARKs
+✅ **Agent Discoverable** - Full x402 Bazaar compatibility
 ✅ **Public Auditability** - Anyone can verify we paid legitimate claims
 ✅ **Privacy-Preserving** - Merchant identity & API content stay private
 ✅ **x402 Native** - Seamless integration with x402 payment protocol
@@ -114,7 +113,7 @@ Pay a 1% premium → Get coverage (up to $0.1 USDC per claim) → If merchant fa
 2. **Privacy Preservation** - Merchant identity protected, no public shaming
 3. **Trustless Verification** - Math proves fraud, not our word (future: fully on-chain)
 
-**Technology:** Nova IVC (Incremental Verifiable Computation) + Spartan SNARKs on Bn256 curve
+**Technology:** zkEngine with Nova/Spartan SNARKs on Bn256 curve
 
 ## Quick Start
 
@@ -132,8 +131,8 @@ pip install /tmp/x402/python/x402
 #   - Backend wallet credentials
 
 # 3. Fund wallet (REQUIRED)
-# Send ETH for gas: 0xba72eD392dB9d67813D68D562D2d67c36fFF566b
-# Send USDC for refunds: 0xba72eD392dB9d67813D68D562D2d67c36fFF566b
+# Send ETH for gas: 0xa4d01549F1460142FAF735e6B18600949C5764a9
+# Send USDC for refunds: 0xa4d01549F1460142FAF735e6B18600949C5764a9
 
 # 4. Run server
 python server.py
@@ -147,31 +146,19 @@ Server runs on **http://localhost:8000**
 
 Your service is fully discoverable by autonomous agents via:
 
-### A2A Protocol (Agent-to-Agent)
-```bash
-# Discover service via agent card
-curl https://your-domain.com/.well-known/agent-card.json
-
-# Returns complete service metadata:
-# - Identity and capabilities
-# - All available services with schemas
-# - x402 payment requirements
-# - Performance metrics
-```
-
 ### x402 Bazaar
 Ready for listing in the x402 Bazaar discovery service:
 - ✅ Complete input/output JSON schemas
 - ✅ Rich metadata (category, tags, pricing)
 - ✅ x402Version field
 - ✅ Performance metrics
-- ✅ Automatic registration via CDP facilitator
+- ✅ Agent-card.json for service discovery
 
 ### Discovery Endpoints
 
 | Endpoint | Description |
 |----------|-------------|
-| `/.well-known/agent-card.json` | A2A agent card (complete service discovery) |
+| `/.well-known/agent-card.json` | Service discovery agent card |
 | `/api` | API information & x402 metadata |
 | `/api/pricing` | Detailed pricing information |
 | `/api/schema` | OpenAPI 3.0 specification (JSON/YAML) |
@@ -369,7 +356,7 @@ curl -X POST http://localhost:8000/claim \
 ## Technology Stack
 
 - **x402 Protocol** - Decentralized HTTP payments (Coinbase)
-- **zkEngine** - Nova/Arecibo zero-knowledge proofs
+- **zkEngine** - Nova/Spartan zero-knowledge proof system
 - **Base Mainnet** - Ethereum L2 for USDC refunds
 - **Alchemy** - Reliable RPC provider
 - **Flask** - Minimal Python web framework
@@ -464,7 +451,7 @@ Kyle Den Hartog (Brave Security) identified a critical gap:
 
 ## Support
 
-**Wallet:** 0xba72eD392dB9d67813D68D562D2d67c36fFF566b
+**Wallet:** 0xa4d01549F1460142FAF735e6B18600949C5764a9
 **Network:** Base Mainnet (Chain ID: 8453)
 **Block Explorer:** https://basescan.org
 
