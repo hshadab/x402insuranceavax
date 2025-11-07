@@ -2,8 +2,9 @@
 x402 Insurance Service - Minimal Flask Server
 
 Endpoints:
-  GET  / - Dashboard UI
-  GET  /api - API documentation
+  GET  / - Dashboard UI (home page)
+  GET  /docs - API documentation (for site viewers)
+  GET  /api - API info JSON (for agents)
   GET  /api/dashboard - Dashboard data (live stats)
   POST /insure - Create insurance policy (requires x402 payment)
   POST /claim - Submit fraud claim
@@ -19,8 +20,9 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from dotenv import load_dotenv
 
-from x402.flask.middleware import PaymentMiddleware
-from x402.types import TokenAmount, TokenAsset, EIP712Domain
+# x402 SDK not needed - using custom implementation
+# from x402.flask.middleware import PaymentMiddleware
+# from x402.types import TokenAmount, TokenAsset, EIP712Domain
 
 from zkengine_client import ZKEngineClient
 from blockchain import BlockchainClient
@@ -53,7 +55,7 @@ USDC_ADDRESS = os.getenv("USDC_CONTRACT_ADDRESS", "0x036CbD53842c5426634e7929541
 
 # Initialize x402 payment middleware
 if BACKEND_ADDRESS:
-    payment_middleware = PaymentMiddleware(app)
+    # payment_middleware = PaymentMiddleware(app)  # Using custom x402 implementation
     print(f"✅ x402 middleware initialized")
     print(f"   Premium: {PREMIUM_PERCENTAGE * 100}% of coverage amount")
     print(f"   Max coverage: {MAX_COVERAGE} USDC")
@@ -87,6 +89,12 @@ def save_data(file_path, data):
 def index():
     """Serve dashboard UI"""
     return send_from_directory('static', 'dashboard.html')
+
+
+@app.route('/docs')
+def docs():
+    """Serve API documentation page"""
+    return send_from_directory('static', 'api-docs.html')
 
 
 @app.route('/api')
