@@ -670,8 +670,8 @@ USDC: 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913
                     Agents pay a premium (1% of coverage amount) via x402 protocol to insure against merchant fraud. Payments are verified on-chain.
                 </p>
                 <p style="margin-bottom: 15px;">
-                    <strong style="color: var(--accent-primary);">2. NovaNet Generates Proofs</strong><br/>
-                    When agent submits fraud claim, NovaNet generates a zero-knowledge proof that verifies whether fraud took place, without revealing private merchant data.
+                    <strong style="color: var(--accent-primary);">2. zkEngine Generates Proofs</strong><br/>
+                    When agent submits fraud claim, zkEngine analyzes the HTTP response and generates a zero-knowledge proof. The proof cryptographically certifies that fraud conditions were met (e.g., status >= 500) without exposing the actual response data—like proving you know a password without revealing the password itself.
                 </p>
                 <p>
                     <strong style="color: var(--accent-primary);">3. Automatic USDC Refunds</strong><br/>

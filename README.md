@@ -2,7 +2,8 @@
 
 **Zero-Knowledge Proof Verified Insurance Against x402 Merchant Fraud**
 
-Protect your micropayment API calls with instant, cryptographically-verified refunds on Base Mainnet.
+Protect your AI agents' micropayment API calls with instant, cryptographically-verified
+refunds on Base Mainnet.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![x402 Protocol](https://img.shields.io/badge/x402-Compatible-blue)](https://github.com/coinbase/x402)
@@ -54,8 +55,10 @@ Pay a 1% premium → Get coverage (up to $0.1 USDC per claim) → If merchant fa
                     ↓
 4. Agent submits fraud claim with HTTP response data
                     ↓
-5. zkEngine generates cryptographic proof (~15s)
-   → Math proves: "status >= 500 AND payout ≤ coverage"
+5. zkEngine analyzes the HTTP response and generates zero-knowledge proof (~15s)
+   → Cryptographically certifies fraud conditions were met (e.g., status >= 500)
+   → Without exposing actual response data—like proving you know a password
+     without revealing the password itself
                     ↓
 6. Proof verified → We pay agent X USDC FROM OUR RESERVES
    → Merchant keeps their payment, we absorb the loss
