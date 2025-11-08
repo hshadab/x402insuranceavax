@@ -83,14 +83,9 @@ class ProductionConfig(Config):
 
     # Require mainnet configuration
     BASE_RPC_URL = os.getenv("BASE_RPC_URL")
-    if not BASE_RPC_URL:
-        raise ValueError("BASE_RPC_URL must be set in production")
 
-    # Require wallet configuration
-    if not Config.BACKEND_WALLET_PRIVATE_KEY:
-        raise ValueError("BACKEND_WALLET_PRIVATE_KEY must be set in production")
-    if not Config.BACKEND_WALLET_ADDRESS:
-        raise ValueError("BACKEND_WALLET_ADDRESS must be set in production")
+    # Require wallet configuration (validated at runtime, not import time)
+    # Validation happens in get_config() or when config is used
 
     # Full payment verification in production
     PAYMENT_VERIFICATION_MODE = "full"
@@ -125,4 +120,15 @@ def get_config(env: str = None) -> Config:
         env = os.getenv('FLASK_ENV', os.getenv('ENV', 'development'))
 
     config_class = config_map.get(env.lower(), DevelopmentConfig)
-    return config_class()
+    config = config_class()
+
+    # Validate production config
+    if isinstance(config, ProductionConfig):
+        if not config.BASE_RPC_URL:
+            raise ValueError("BASE_RPC_URL must be set in production")
+        if not config.BACKEND_WALLET_PRIVATE_KEY:
+            raise ValueError("BACKEND_WALLET_PRIVATE_KEY must be set in production")
+        if not config.BACKEND_WALLET_ADDRESS:
+            raise ValueError("BACKEND_WALLET_ADDRESS must be set in production")
+
+    return config
