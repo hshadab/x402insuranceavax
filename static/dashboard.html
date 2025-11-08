@@ -605,19 +605,49 @@
             </div>
 
             <div class="card">
-                <div class="card-title">💰 Total Coverage</div>
+                <div class="card-title">
+                    <svg style="width: 20px; height: 20px; margin-right: 8px; opacity: 0.6;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M12 6v6M12 18h.01"/>
+                    </svg>
+                    USDC Reserve
+                </div>
+                <div class="card-value" id="usdcReserve">Loading...</div>
+                <div class="card-label">Available for refunds</div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">
+                    <svg style="width: 20px; height: 20px; margin-right: 8px; opacity: 0.6;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                    </svg>
+                    Total Coverage
+                </div>
                 <div class="card-value" id="totalCoverage">$0</div>
                 <div class="card-label">Active policies</div>
             </div>
 
             <div class="card">
-                <div class="card-title">📋 Total Policies</div>
+                <div class="card-title">
+                    <svg style="width: 20px; height: 20px; margin-right: 8px; opacity: 0.6;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <line x1="9" y1="15" x2="15" y2="15"/>
+                    </svg>
+                    Total Policies
+                </div>
                 <div class="card-value" id="totalPolicies">0</div>
                 <div class="card-label">Since inception</div>
             </div>
 
             <div class="card">
-                <div class="card-title">✅ Claims Paid</div>
+                <div class="card-title">
+                    <svg style="width: 20px; height: 20px; margin-right: 8px; opacity: 0.6;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                        <polyline points="22 4 12 14.01 9 11.01"/>
+                    </svg>
+                    Claims Paid
+                </div>
                 <div class="card-value" id="claimsPaid">$0</div>
                 <div class="card-label">Via zkEngine proofs</div>
             </div>
@@ -627,10 +657,19 @@
         <div class="dashboard-grid">
             <!-- Recent Policies -->
             <div class="card">
-                <div class="card-title">📑 Recent Policies</div>
+                <div class="card-title">
+                    <svg style="width: 20px; height: 20px; margin-right: 8px; opacity: 0.6;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                    </svg>
+                    Recent Policies
+                </div>
                 <div id="recentPolicies">
                     <div class="empty-state">
-                        <div class="empty-state-icon">📋</div>
+                        <svg style="width: 48px; height: 48px; opacity: 0.3;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14 2 14 8 20 8"/>
+                        </svg>
                         <div>No policies yet</div>
                     </div>
                 </div>
@@ -638,10 +677,19 @@
 
             <!-- Recent Claims -->
             <div class="card">
-                <div class="card-title">🔬 Recent Claims</div>
+                <div class="card-title">
+                    <svg style="width: 20px; height: 20px; margin-right: 8px; opacity: 0.6;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/>
+                        <path d="m21 21-4.35-4.35"/>
+                    </svg>
+                    Recent Claims
+                </div>
                 <div id="recentClaims">
                     <div class="empty-state">
-                        <div class="empty-state-icon">🔍</div>
+                        <svg style="width: 48px; height: 48px; opacity: 0.3;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"/>
+                            <path d="m21 21-4.35-4.35"/>
+                        </svg>
                         <div>No claims yet</div>
                     </div>
                 </div>
@@ -650,7 +698,15 @@
 
         <!-- Blockchain Stats -->
         <div class="card" id="blockchainCard" style="display: none;">
-            <div class="card-title">⛓️ Blockchain Status</div>
+            <div class="card-title">
+                <svg style="width: 20px; height: 20px; margin-right: 8px; opacity: 0.6;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="7" height="7"/>
+                    <rect x="14" y="3" width="7" height="7"/>
+                    <rect x="14" y="14" width="7" height="7"/>
+                    <rect x="3" y="14" width="7" height="7"/>
+                </svg>
+                Blockchain Status
+            </div>
             <div class="stats-grid">
                 <div class="stat-box">
                     <div class="stat-value" id="chainId">8453</div>
@@ -678,7 +734,13 @@ USDC: 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913
 
         <!-- How It Works -->
         <div class="card">
-            <div class="card-title">💡 How It Works</div>
+            <div class="card-title">
+                <svg style="width: 20px; height: 20px; margin-right: 8px; opacity: 0.6;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M12 16v-4M12 8h.01"/>
+                </svg>
+                How It Works
+            </div>
             <div style="line-height: 1.8; color: var(--text-secondary);">
                 <p style="margin-bottom: 15px;">
                     <strong style="color: var(--accent-primary);">1. Agents Buy Insurance</strong><br/>
