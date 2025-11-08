@@ -16,7 +16,7 @@ import json
 import os
 import uuid
 import hashlib
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -696,6 +696,54 @@ def insure():
         "status": "active",
         "expires_at": policy["expires_at"]
     }), 201
+
+
+@app.route('/policies', methods=['GET'])
+def get_policies():
+    """
+    Get active policies for a wallet address
+
+    Query params:
+        wallet: Agent's wallet address (0x...)
+
+    Returns list of active policies for that wallet
+    """
+    wallet_address = request.args.get('wallet')
+
+    if not wallet_address:
+        return jsonify({"error": "wallet parameter required"}), 400
+
+    # Normalize address to lowercase for comparison
+    wallet_address = wallet_address.lower()
+
+    # Filter policies for this wallet that are still active
+    agent_policies = []
+    current_time = datetime.now(timezone.utc)
+
+    policies = load_data(POLICIES_FILE)
+    for policy_id, policy in policies.items():
+        if policy["agent_address"].lower() == wallet_address:
+            expires_at = datetime.fromisoformat(policy["expires_at"].replace('Z', '+00:00'))
+
+            # Only include active policies (not expired, not claimed)
+            if policy["status"] == "active" and expires_at > current_time:
+                agent_policies.append({
+                    "policy_id": policy_id,
+                    "merchant_url": policy["merchant_url"],
+                    "coverage_amount": policy["coverage_amount"],
+                    "premium": policy["premium"],
+                    "status": policy["status"],
+                    "created_at": policy["created_at"],
+                    "expires_at": policy["expires_at"]
+                })
+
+    return jsonify({
+        "wallet_address": wallet_address,
+        "active_policies": agent_policies,
+        "total_coverage": sum(p["coverage_amount"] for p in agent_policies),
+        "claim_endpoint": "/claim",
+        "note": "Use policy_id from any active policy to file a claim if merchant fails"
+    }), 200
 
 
 @app.route('/claim', methods=['POST'])

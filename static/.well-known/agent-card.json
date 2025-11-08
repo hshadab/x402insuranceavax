@@ -198,6 +198,108 @@
       }
     },
     {
+      "id": "policy-lookup",
+      "name": "Lookup Active Policies",
+      "description": "Find all active insurance policies for your wallet. Solves the agent memory problem - retrieve policy_id using just your wallet address when you need to file a claim.",
+      "endpoint": "https://your-domain.com/policies",
+      "method": "GET",
+      "x402Required": false,
+      "inputSchema": {
+        "type": "object",
+        "required": ["wallet"],
+        "properties": {
+          "wallet": {
+            "type": "string",
+            "pattern": "^0x[a-fA-F0-9]{40}$",
+            "description": "Your wallet address (the one that paid for insurance)",
+            "example": "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "wallet_address": {
+            "type": "string",
+            "description": "The queried wallet address"
+          },
+          "active_policies": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "policy_id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "description": "Use this ID to file claims"
+                },
+                "merchant_url": {
+                  "type": "string",
+                  "description": "The API you protected"
+                },
+                "coverage_amount": {
+                  "type": "integer",
+                  "description": "Coverage in USDC smallest units"
+                },
+                "premium": {
+                  "type": "integer",
+                  "description": "Premium you paid"
+                },
+                "status": {
+                  "type": "string",
+                  "enum": ["active"]
+                },
+                "created_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "expires_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            }
+          },
+          "total_coverage": {
+            "type": "integer",
+            "description": "Sum of all active coverage"
+          },
+          "claim_endpoint": {
+            "type": "string",
+            "description": "Where to submit claims"
+          },
+          "note": {
+            "type": "string",
+            "description": "Usage instructions"
+          }
+        }
+      },
+      "examples": [
+        {
+          "request": {
+            "wallet": "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb"
+          },
+          "response": {
+            "wallet_address": "0x742d35cc6634c0532925a3b844bc9e7595f0beb",
+            "active_policies": [
+              {
+                "policy_id": "550e8400-e29b-41d4-a716-446655440000",
+                "merchant_url": "https://api.weather.com/forecast",
+                "coverage_amount": 10000,
+                "premium": 100,
+                "status": "active",
+                "created_at": "2025-11-07T10:00:00Z",
+                "expires_at": "2025-11-08T10:00:00Z"
+              }
+            ],
+            "total_coverage": 10000,
+            "claim_endpoint": "/claim",
+            "note": "Use policy_id from any active policy to file a claim if merchant fails"
+          }
+        }
+      ]
+    },
+    {
       "id": "verify-proof",
       "name": "Verify ZK Proof",
       "description": "Publicly verify a zero-knowledge proof of merchant fraud. Anyone can verify claims are legitimate without exposing private data.",

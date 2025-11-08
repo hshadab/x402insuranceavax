@@ -80,6 +80,22 @@ Pay a 1% premium → Get coverage (up to $0.1 USDC per claim) → If merchant fa
 
 **Important:** This is insurance (we pay from reserves), not chargebacks (reversing merchant payment). From the agent's perspective, the outcome is the same: money back when merchant fails.
 
+### Solving the Agent Memory Problem
+
+**Challenge:** AI agents have limited context windows and may forget their policy_id between insurance purchase and claim filing (could be hours or days later).
+
+**Solution:** Wallet-based policy lookup
+- Agents can always access their wallet address (it's fundamental to their identity)
+- GET /policies?wallet=0x... returns all active policies for that wallet
+- No need to store policy_id - just remember your wallet address
+- Query anytime to find policies and file claims
+
+**Why this matters:**
+- Agents don't need to maintain state between purchase and claim
+- Works even after context window resets or system restarts
+- Enables autonomous claim filing without human intervention
+- Compatible with all agent frameworks (no special storage required)
+
 ### Fraud Detection Rules
 
 **We issue refunds when merchants:**
@@ -171,7 +187,56 @@ See [AGENT_DISCOVERY.md](AGENT_DISCOVERY.md) for complete integration guide.
 
 ## API Endpoints
 
-### 1. Create Insurance Policy (x402 Payment Required)
+### 1. Lookup Active Policies (Solves Agent Memory Problem)
+
+**NEW: Find your policies when you need to file a claim**
+
+This endpoint solves the "agent memory problem" - agents with limited context windows can forget their policy_id between purchase and claim filing. Simply query with your wallet address to retrieve all active policies.
+
+```bash
+GET /policies?wallet=0x...
+
+Response:
+{
+  "wallet_address": "0x...",
+  "active_policies": [
+    {
+      "policy_id": "550e8400-e29b-41d4-a716-446655440000",
+      "merchant_url": "https://api.example.com",
+      "coverage_amount": 10000,
+      "premium": 100,
+      "status": "active",
+      "created_at": "2025-11-07T10:00:00Z",
+      "expires_at": "2025-11-08T10:00:00Z"
+    }
+  ],
+  "total_coverage": 10000,
+  "claim_endpoint": "/claim",
+  "note": "Use policy_id from any active policy to file a claim if merchant fails"
+}
+```
+
+**Usage in Agent Flow:**
+```python
+# When merchant fails and you need to file a claim:
+# 1. Get your wallet address (you always know this)
+my_wallet = agent.wallet.address
+
+# 2. Lookup your active policies
+policies = httpx.get(f"http://localhost:8000/policies?wallet={my_wallet}").json()
+
+# 3. Find the policy for the failed merchant
+policy = next(p for p in policies["active_policies"]
+              if p["merchant_url"] == failed_merchant_url)
+
+# 4. File claim with the policy_id
+claim = httpx.post("http://localhost:8000/claim", json={
+    "policy_id": policy["policy_id"],
+    "http_response": {"status": 503, "body": ""}
+})
+```
+
+### 2. Create Insurance Policy (x402 Payment Required)
 
 **Important:** This endpoint requires a valid x402 payment. Without payment, you'll receive a 402 Payment Required response with payment details.
 
