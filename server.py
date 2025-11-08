@@ -1,5 +1,5 @@
 """
-x402 Insurance Service - Minimal Flask Server
+x402 Insurance Service - Production-Ready Flask Server
 
 Endpoints:
   GET  / - Dashboard UI (home page)
@@ -10,100 +10,196 @@ Endpoints:
   POST /claim - Submit fraud claim
   POST /verify - Verify proof (public)
   GET  /proofs/<claim_id> - Get proof data (public)
+  GET  /health - Health check with dependency status
+  GET  /api/reserves - Reserve health status
+
+Enhanced with:
+- Proper x402 payment verification
+- Rate limiting
+- Database abstraction (JSON or PostgreSQL)
+- Reserve monitoring
+- Better error handling
 """
 from flask import Flask, request, jsonify, g, send_from_directory
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+from flask_cors import CORS
 import json
 import os
 import uuid
 import hashlib
+import logging
+from decimal import Decimal, ROUND_DOWN
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from dotenv import load_dotenv
-
-# x402 SDK not needed - using custom implementation
-# from x402.flask.middleware import PaymentMiddleware
-# from x402.types import TokenAmount, TokenAsset, EIP712Domain
+from typing import Tuple, List, Optional
 
 from zkengine_client import ZKEngineClient
 from blockchain import BlockchainClient
+from database import DatabaseClient
+from auth.payment_verifier import PaymentVerifier, SimplePaymentVerifier
+from tasks.reserve_monitor import ReserveMonitor
+from config import get_config
 
 # Load environment
 load_dotenv()
 
+# Load configuration
+config = get_config()
+
+#############################################
+# App setup
+#############################################
+
 # Initialize Flask
 app = Flask(__name__, static_folder='static')
+app.config.from_object(config)
+
+# Logging
+logging.basicConfig(
+    level=config.LOG_LEVEL,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger("x402insurance")
+
+# CORS
+if config.CORS_ORIGINS:
+    origins = [o.strip() for o in config.CORS_ORIGINS.split(',') if o.strip()]
+    CORS(app, resources={r"/api/*": {"origins": origins}})
+    logger.info("CORS enabled for origins: %s", origins)
+
+# Rate Limiting
+if config.RATE_LIMIT_ENABLED:
+    limiter = Limiter(
+        app=app,
+        key_func=get_remote_address,
+        default_limits=["200 per day", "50 per hour"],
+        storage_uri=config.RATE_LIMIT_STORAGE_URL or "memory://"
+    )
+    logger.info("Rate limiting enabled")
+else:
+    # Create dummy limiter that does nothing
+    class DummyLimiter:
+        def limit(self, *args, **kwargs):
+            def decorator(f):
+                return f
+            return decorator
+    limiter = DummyLimiter()
+    logger.warning("Rate limiting DISABLED")
 
 # Get backend wallet address for x402 payments
-BACKEND_ADDRESS = os.getenv("BACKEND_WALLET_ADDRESS")
+BACKEND_ADDRESS = config.BACKEND_WALLET_ADDRESS
 if not BACKEND_ADDRESS:
-    print("⚠️  WARNING: BACKEND_WALLET_ADDRESS not set - x402 middleware will fail")
-    print("   Set BACKEND_WALLET_ADDRESS in .env to receive x402 payments")
+    logger.warning("BACKEND_WALLET_ADDRESS not set - payment verification will fail")
 
 # Initialize services
-zkengine = ZKEngineClient(os.getenv("ZKENGINE_BINARY_PATH", "./zkengine/zkengine-binary"))
+logger.info("Initializing services...")
+
+# zkEngine
+zkengine = ZKEngineClient(config.ZKENGINE_BINARY_PATH)
+
+# Blockchain
 blockchain = BlockchainClient(
-    rpc_url=os.getenv("BASE_RPC_URL", "https://sepolia.base.org"),
-    usdc_address=os.getenv("USDC_CONTRACT_ADDRESS", "0x036CbD53842c5426634e7929541eC2318f3dCF7e"),
-    private_key=os.getenv("BACKEND_WALLET_PRIVATE_KEY")
+    rpc_url=config.BASE_RPC_URL,
+    usdc_address=config.USDC_CONTRACT_ADDRESS,
+    private_key=config.BACKEND_WALLET_PRIVATE_KEY,
+    max_gas_price_gwei=config.MAX_GAS_PRICE_GWEI,
+    max_retries=config.MAX_RETRIES
 )
 
-# Configuration
-PREMIUM_PERCENTAGE = float(os.getenv("PREMIUM_PERCENTAGE", "0.01"))  # 1% of coverage
-MAX_COVERAGE = float(os.getenv("MAX_COVERAGE_USDC", "0.1"))
-POLICY_DURATION = int(os.getenv("POLICY_DURATION_HOURS", "24"))
-USDC_ADDRESS = os.getenv("USDC_CONTRACT_ADDRESS", "0x036CbD53842c5426634e7929541eC2318f3dCF7e")
+# Database
+database = DatabaseClient(
+    database_url=config.DATABASE_URL,
+    data_dir=config.DATA_DIR
+)
 
-# Initialize x402 payment middleware
-if BACKEND_ADDRESS:
-    # payment_middleware = PaymentMiddleware(app)  # Using custom x402 implementation
-    print(f"✅ x402 middleware initialized")
-    print(f"   Premium: {PREMIUM_PERCENTAGE * 100}% of coverage amount")
-    print(f"   Max coverage: {MAX_COVERAGE} USDC")
-    print(f"   Payment recipient: {BACKEND_ADDRESS}")
+# Payment Verifier
+if config.PAYMENT_VERIFICATION_MODE == "full" and BACKEND_ADDRESS:
+    payment_verifier = PaymentVerifier(
+        backend_address=BACKEND_ADDRESS,
+        usdc_address=config.USDC_CONTRACT_ADDRESS
+    )
+    logger.info("Using FULL payment verification (EIP-712 signatures)")
 else:
-    print("⚠️  x402 middleware DISABLED - no payment verification")
+    payment_verifier = SimplePaymentVerifier(
+        backend_address=BACKEND_ADDRESS or "0x0000000000000000000000000000000000000000",
+        usdc_address=config.USDC_CONTRACT_ADDRESS
+    )
+    logger.info("Using SIMPLE payment verification (testing mode)")
 
-# Simple JSON file storage
-DATA_DIR = Path("data")
+# Reserve Monitor
+reserve_monitor = ReserveMonitor(
+    blockchain_client=blockchain,
+    database_client=database,
+    min_reserve_ratio=config.MIN_RESERVE_RATIO
+)
+
+# Configuration summary
+PREMIUM_PERCENTAGE = config.PREMIUM_PERCENTAGE
+MAX_COVERAGE = config.MAX_COVERAGE_USDC
+POLICY_DURATION = config.POLICY_DURATION_HOURS
+USDC_ADDRESS = config.USDC_CONTRACT_ADDRESS
+
+logger.info("x402 Insurance Service initialized")
+logger.info("Premium: %.4f%% of coverage amount", PREMIUM_PERCENTAGE * 100)
+logger.info("Max coverage: %s USDC", MAX_COVERAGE)
+logger.info("Payment recipient: %s", BACKEND_ADDRESS or "NOT SET")
+logger.info("Database: %s", "PostgreSQL" if config.DATABASE_URL else "JSON files")
+
+# Backward compatibility: keep old load_data/save_data for dashboard
+DATA_DIR = config.DATA_DIR
 DATA_DIR.mkdir(exist_ok=True)
-
 POLICIES_FILE = DATA_DIR / "policies.json"
 CLAIMS_FILE = DATA_DIR / "claims.json"
 
 
-def load_data(file_path):
-    """Load data from JSON file"""
+def load_data(file_path: Path):
+    """Backward compatibility - load JSON file"""
     if not file_path.exists():
         return {}
-    with open(file_path, 'r') as f:
-        return json.load(f)
+    try:
+        with open(file_path, 'r') as f:
+            return json.load(f)
+    except Exception:
+        return {}
 
 
-def save_data(file_path, data):
-    """Save data to JSON file"""
-    with open(file_path, 'w') as f:
-        json.dump(data, f, indent=2, default=str)
+# Monetary helpers (USDC 6 decimals)
+MICRO = Decimal(10) ** 6
 
 
-# Mock x402 payment verification for testing
-class MockVerifyResponse:
-    def __init__(self, payer):
-        self.payer = payer
+def to_micro(amount_usdc: Decimal | float) -> int:
+    d = Decimal(str(amount_usdc))
+    return int((d * MICRO).to_integral_exact(rounding=ROUND_DOWN))
+
+
+def from_micro(amount_units: int) -> float:
+    return float(Decimal(amount_units) / MICRO)
+
+
+def iso_utc_now() -> str:
+    return datetime.now(timezone.utc).isoformat()
+
+
+def parse_utc(dt_str: str) -> datetime:
+    # Accept both Z and +00:00 or naive (assume UTC)
+    s = dt_str.replace('Z', '+00:00')
+    try:
+        dt = datetime.fromisoformat(s)
+    except Exception:
+        dt = datetime.utcnow().replace(tzinfo=timezone.utc)
+    if dt.tzinfo is None:
+        return dt.replace(tzinfo=timezone.utc)
+    return dt
 
 
 @app.before_request
 def handle_x402_payment():
-    """
-    Simple x402 payment handler for testing.
-    In production, this would verify actual x402 payments.
-    """
+    """Capture X-Payment header for verification in /insure endpoint."""
     if request.path == '/insure' and request.method == 'POST':
-        x_payment = request.headers.get('X-Payment') or request.headers.get('X-PAYMENT')
-        if x_payment:
-            # Parse simple test payment format: "token=xxx,amount=yyy,signature=zzz"
-            # In production, this would verify the actual x402 signature
-            # For testing, we just extract a mock payer address
-            g.verify_response = MockVerifyResponse(payer="0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0")
+        g.payment_header = request.headers.get('X-Payment') or request.headers.get('X-PAYMENT')
+        g.payer_header = request.headers.get('X-Payer') or request.headers.get('X-FROM-ADDRESS')
 
 
 @app.route('/')
@@ -145,10 +241,10 @@ def api_info():
                 "/insure": {
                     "scheme": "exact",
                     "network": "base",
-                    "maxAmountRequired": str(int(DEFAULT_PREMIUM * 1_000_000)),
+                    "maxAmountRequired": str(int(MAX_COVERAGE * PREMIUM_PERCENTAGE * 1_000_000)),
                     "asset": USDC_ADDRESS,
                     "payTo": BACKEND_ADDRESS,
-                    "description": "Insurance premium for micropayment protection",
+                    "description": "Insurance premium (1% of requested coverage)",
                     "mimeType": "application/json",
                     "maxTimeoutSeconds": 60
                 }
@@ -306,7 +402,7 @@ def dashboard_data():
                 "chain_id": w3.eth.chain_id
             }
         except Exception as e:
-            print(f"Error getting blockchain stats: {e}")
+            logger.exception("Error getting blockchain stats: %s", e)
 
     # Get recent items
     recent_policies = sorted(policies, key=lambda x: x.get('created_at', ''), reverse=True)[:5]
@@ -332,28 +428,13 @@ def pricing_info():
             "model": "percentage-based",
             "percentage": PREMIUM_PERCENTAGE,
             "percentage_display": f"{PREMIUM_PERCENTAGE * 100}%",
-            "calculation": "Premium = Coverage Amount × 1%",
+            "calculation": "premium = coverage × percentage",
             "currency": "USDC",
             "network": "base",
             "examples": {
-                "0.01_usdc_coverage": {
-                    "coverage": 0.01,
-                    "premium": 0.0001,
-                    "premium_display": "$0.0001",
-                    "units": 100
-                },
-                "0.05_usdc_coverage": {
-                    "coverage": 0.05,
-                    "premium": 0.0005,
-                    "premium_display": "$0.0005",
-                    "units": 500
-                },
-                "0.1_usdc_coverage": {
-                    "coverage": 0.1,
-                    "premium": 0.001,
-                    "premium_display": "$0.001",
-                    "units": 1000
-                }
+                "0.01_usdc_coverage": {"coverage": 0.01, "premium": 0.0001, "units": 100},
+                "0.05_usdc_coverage": {"coverage": 0.05, "premium": 0.0005, "units": 500},
+                "0.1_usdc_coverage": {"coverage": 0.1, "premium": 0.001, "units": 1000}
             }
         },
         "coverage": {
@@ -579,8 +660,8 @@ def agent_card():
             "category": "insurance",
             "tags": ["insurance", "x402", "zkp", "micropayments", "fraud-protection"],
             "pricing": {
-                "model": "pay-per-policy",
-                "premium": DEFAULT_PREMIUM,
+                "model": "percentage-based",
+                "percentage": PREMIUM_PERCENTAGE,
                 "currency": "USDC"
             },
             "performance": {
@@ -602,15 +683,24 @@ def agent_card():
 
 @app.route('/health')
 def health():
-    """Health check"""
+    """Health check with real dependency status."""
+    zk_status = "operational" if not getattr(zkengine, 'use_mock', True) else "mock"
+    bc_connected = False
+    try:
+        bc_connected = blockchain.w3.is_connected() if blockchain else False
+    except Exception:
+        bc_connected = False
+    status = "healthy" if bc_connected else "degraded"
     return jsonify({
-        "status": "healthy",
-        "zkengine": "operational",
-        "blockchain": "connected"
+        "status": status,
+        "zkengine": zk_status,
+        "blockchain": "connected" if bc_connected else "disconnected",
+        "wallet": getattr(blockchain, 'has_wallet', False)
     })
 
 
 @app.route('/insure', methods=['POST'])
+@limiter.limit("10 per hour")
 def insure():
     """
     Create insurance policy
@@ -634,7 +724,7 @@ def insure():
       }
     """
     # Get request data first to calculate premium
-    data = request.json
+    data = request.json or {}
     merchant_url = data.get('merchant_url')
     coverage_amount = data.get('coverage_amount')
 
@@ -642,6 +732,9 @@ def insure():
         return jsonify({"error": "Missing merchant_url or coverage_amount"}), 400
 
     # Validate coverage amount
+    if coverage_amount is None:
+        return jsonify({"error": "coverage_amount required"}), 400
+
     if coverage_amount <= 0:
         return jsonify({"error": "Coverage amount must be positive"}), 400
 
@@ -649,44 +742,79 @@ def insure():
         return jsonify({"error": f"Coverage exceeds maximum of {MAX_COVERAGE} USDC"}), 400
 
     # Calculate premium dynamically (1% of coverage)
-    premium = coverage_amount * PREMIUM_PERCENTAGE
-    premium_units = int(premium * 1_000_000)  # Convert to smallest units
+    premium = float(Decimal(str(coverage_amount)) * Decimal(str(PREMIUM_PERCENTAGE)))
+    premium_units = to_micro(premium)
 
     # Dynamic x402 payment requirement handled by custom implementation below
     # (payment_middleware SDK not used)
 
-    # x402 middleware handles payment verification
-    # Get payer address from x402 verification response
-    verify_response = getattr(g, 'verify_response', None)
+    # Payment verification using new payment verifier
+    payment_header = getattr(g, 'payment_header', None)
+    payer_header = getattr(g, 'payer_header', None)
 
-    if not verify_response or not verify_response.payer:
-        return jsonify({
-            "error": "Payment verification failed - no payer address found",
-            "debug": "x402 middleware may not be configured correctly"
-        }), 500
+    if not payment_header:
+        # Return proper 402 with required payment details
+        required = {
+            "x402Version": 1,
+            "payment": {
+                "scheme": "exact",
+                "network": "base",
+                "amount": str(premium_units),
+                "asset": {"address": USDC_ADDRESS, "decimals": 6, "symbol": "USDC"},
+                "pay_to": BACKEND_ADDRESS,
+                "mimeType": "application/json",
+                "maxTimeoutSeconds": 60,
+                "description": "Insurance premium (1% of requested coverage)"
+            }
+        }
+        headers = {"X-Payment-Required": json.dumps(required["payment"])}
+        return jsonify(required), 402, headers
 
-    agent_address = verify_response.payer
+    # Verify payment
+    payment_details = payment_verifier.verify_payment(
+        payment_header=payment_header,
+        payer_address=payer_header,
+        required_amount=premium_units,
+        max_age_seconds=config.PAYMENT_MAX_AGE_SECONDS
+    )
+
+    if not payment_details.is_valid:
+        logger.warning("Payment verification failed for premium=%s units", premium_units)
+        required = {
+            "error": "Payment verification failed",
+            "expected_amount": str(premium_units),
+            "asset": {"address": USDC_ADDRESS, "decimals": 6, "symbol": "USDC"},
+            "pay_to": BACKEND_ADDRESS,
+            "network": "base"
+        }
+        headers = {"X-Payment-Required": json.dumps(required)}
+        return jsonify(required), 402, headers
+
+    agent_address = payment_details.payer
 
     # Create policy
     policy_id = str(uuid.uuid4())
     merchant_url_hash = hashlib.sha256(merchant_url.encode()).hexdigest()
 
     policy = {
-        "id": policy_id,
+        "policy_id": policy_id,
         "agent_address": agent_address,
         "merchant_url": merchant_url,
         "merchant_url_hash": merchant_url_hash,
         "coverage_amount": coverage_amount,
+        "coverage_amount_units": to_micro(coverage_amount),
         "premium": premium,
+        "premium_units": premium_units,
         "status": "active",
-        "created_at": datetime.utcnow().isoformat(),
-        "expires_at": (datetime.utcnow() + timedelta(hours=POLICY_DURATION)).isoformat()
+        "created_at": iso_utc_now(),
+        "expires_at": (datetime.now(timezone.utc) + timedelta(hours=POLICY_DURATION)).isoformat()
     }
 
-    # Save policy
-    policies = load_data(POLICIES_FILE)
-    policies[policy_id] = policy
-    save_data(POLICIES_FILE, policies)
+    # Save policy using database client
+    success = database.create_policy(policy_id, policy)
+    if not success:
+        logger.error("Failed to save policy: %s", policy_id)
+        return jsonify({"error": "Failed to create policy"}), 500
 
     return jsonify({
         "policy_id": policy_id,
@@ -722,19 +850,20 @@ def get_policies():
 
     policies = load_data(POLICIES_FILE)
     for policy_id, policy in policies.items():
-        if policy["agent_address"].lower() == wallet_address:
-            expires_at = datetime.fromisoformat(policy["expires_at"].replace('Z', '+00:00'))
+        if policy.get("agent_address", "").lower() == wallet_address:
+            expires_at = parse_utc(policy["expires_at"]) if policy.get("expires_at") else datetime.now(timezone.utc)
 
             # Only include active policies (not expired, not claimed)
             if policy["status"] == "active" and expires_at > current_time:
                 agent_policies.append({
-                    "policy_id": policy_id,
-                    "merchant_url": policy["merchant_url"],
-                    "coverage_amount": policy["coverage_amount"],
-                    "premium": policy["premium"],
-                    "status": policy["status"],
-                    "created_at": policy["created_at"],
-                    "expires_at": policy["expires_at"]
+                    "policy_id": policy.get("policy_id", policy_id),
+                    "merchant_url": policy.get("merchant_url"),
+                    "merchant_url_hash": policy.get("merchant_url_hash"),
+                    "coverage_amount": policy.get("coverage_amount"),
+                    "premium": policy.get("premium"),
+                    "status": policy.get("status"),
+                    "created_at": policy.get("created_at"),
+                    "expires_at": policy.get("expires_at")
                 })
 
     return jsonify({
@@ -747,6 +876,7 @@ def get_policies():
 
 
 @app.route('/claim', methods=['POST'])
+@limiter.limit("5 per hour")
 def claim():
     """
     Submit fraud claim
@@ -791,7 +921,7 @@ def claim():
         return jsonify({"error": f"Policy is not active: {policy['status']}"}), 400
 
     # Check expiration
-    if datetime.fromisoformat(policy["expires_at"]) < datetime.utcnow():
+    if parse_utc(policy["expires_at"]) < datetime.now(timezone.utc):
         return jsonify({"error": "Policy expired"}), 400
 
     # Generate zkEngine proof
@@ -824,11 +954,11 @@ def claim():
 
     # Use policy coverage amount as payout (parametric insurance)
     # zkEngine proves fraud occurred, we pay the full coverage amount
-    payout_amount = policy["coverage_amount"]
+    payout_amount = policy.get("coverage_amount")
 
     # Issue USDC refund
     # Convert USDC to smallest units (6 decimals): 0.01 USDC = 10,000 units
-    payout_amount_units = int(payout_amount * 1_000_000)
+    payout_amount_units = policy.get("coverage_amount_units") or to_micro(payout_amount)
 
     try:
         refund_tx_hash = blockchain.issue_refund(
@@ -843,7 +973,7 @@ def claim():
     http_body_hash = hashlib.sha256(http_response["body"].encode()).hexdigest()
 
     claim_record = {
-        "id": claim_id,
+        "claim_id": claim_id,
         "policy_id": policy_id,
         "proof": proof_hex,
         "public_inputs": public_inputs,
@@ -853,11 +983,12 @@ def claim():
         "http_body_hash": http_body_hash,
         "http_headers": http_response.get("headers", {}),
         "payout_amount": payout_amount,
+        "payout_amount_units": payout_amount_units,
         "refund_tx_hash": refund_tx_hash,
         "recipient_address": policy["agent_address"],
         "status": "paid",
-        "created_at": datetime.utcnow().isoformat(),
-        "paid_at": datetime.utcnow().isoformat()
+        "created_at": iso_utc_now(),
+        "paid_at": iso_utc_now()
     }
 
     # Save claim
@@ -957,6 +1088,50 @@ def get_proof(claim_id):
     return jsonify(claim)
 
 
+#############################################
+# Basic in-process metrics (prototype)
+#############################################
+
+METRICS = {
+    "policies_created_total": 0,
+    "claims_paid_total": 0,
+}
+
+
+@app.after_request
+def after_request(resp):
+    try:
+        if request.endpoint == 'insure' and resp.status_code == 201:
+            METRICS["policies_created_total"] += 1
+        if request.endpoint == 'claim' and resp.status_code == 201:
+            METRICS["claims_paid_total"] += 1
+    except Exception:
+        pass
+    return resp
+
+
+@app.route('/api/reserves')
+def reserves():
+    """Reserve health monitoring endpoint"""
+    try:
+        health = reserve_monitor.check_reserve_health()
+        return jsonify(health), 200
+    except Exception as e:
+        logger.exception("Error checking reserves: %s", e)
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/metrics')
+def metrics():
+    lines = [
+        f"x402_policies_created_total {METRICS['policies_created_total']}",
+        f"x402_claims_paid_total {METRICS['claims_paid_total']}"
+    ]
+    return '\n'.join(lines) + '\n', 200, {"Content-Type": "text/plain; version=0.0.4"}
+
+
 if __name__ == '__main__':
-    port = int(os.getenv('PORT', 8000))
-    app.run(host='0.0.0.0', port=port, debug=True)
+    port = config.PORT
+    debug = config.DEBUG
+    logger.info("Starting x402 Insurance Service on %s:%d (debug=%s)", config.HOST, port, debug)
+    app.run(host=config.HOST, port=port, debug=debug)

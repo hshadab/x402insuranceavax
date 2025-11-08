@@ -10,7 +10,7 @@ refunds on Base Mainnet.
 
 ## Status
 
-🟢 **Production Ready** (Base Mainnet) | 🤖 **Agent Discoverable** | 🌐 **x402 Bazaar Ready**
+🟠 Prototype (Flask) | 🤖 Agent Discoverable | 🔬 For evaluation/testing
 Version: 1.0.0
 Date: 2025-11-06
 
@@ -36,7 +36,7 @@ Pay a 1% premium → Get coverage (up to $0.1 USDC per claim) → If merchant fa
 ✅ **Agent Discoverable** - Full x402 Bazaar compatibility
 ✅ **Public Auditability** - Anyone can verify we paid legitimate claims
 ✅ **Privacy-Preserving** - Merchant identity & API content stay private
-✅ **x402 Native** - Seamless integration with x402 payment protocol
+✅ **x402 Native (prototype)** - Minimal payment verification for testing
 
 ## How It Works
 
@@ -138,22 +138,19 @@ Pay a 1% premium → Get coverage (up to $0.1 USDC per claim) → If merchant fa
 
 ```bash
 # 1. Install dependencies
-cd /home/hshadab/x402insurance
-source venv/bin/activate
+python -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
-pip install /tmp/x402/python/x402
 
-# 2. Configure environment (already done for Base Mainnet)
-# .env is configured with:
-#   - Base Mainnet RPC (Alchemy)
-#   - USDC contract address
-#   - Backend wallet credentials
+# 2. Configure environment (Base Sepolia recommended for dev)
+# Copy .env.example to .env and set values:
+#   BASE_RPC_URL=...           # use testnet for development
+#   USDC_CONTRACT_ADDRESS=...
+#   BACKEND_WALLET_PRIVATE_KEY=... (dev only)
+#   BACKEND_WALLET_ADDRESS=...
+#   PREMIUM_PERCENTAGE=0.01
+#   MAX_COVERAGE_USDC=0.1
 
-# 3. Fund wallet (REQUIRED)
-# Send ETH for gas: 0xa4d01549F1460142FAF735e6B18600949C5764a9
-# Send USDC for refunds: 0xa4d01549F1460142FAF735e6B18600949C5764a9
-
-# 4. Run server
+# 3. Run server (mock zkEngine and minimal x402 verification)
 python server.py
 ```
 
@@ -345,8 +342,8 @@ import httpx
 # 1. Buy insurance
 policy = httpx.post(
     "http://localhost:8000/insure",
-    headers={"X-Payment": "token=xyz,amount=1000,signature=abc"},
-    json={"merchant_url": "https://api.com", "coverage": 10000}
+    headers={"X-Payment": "token=xyz,amount=100,signature=abc"},
+    json={"merchant_url": "https://api.com", "coverage_amount": 0.01}
 ).json()
 
 # 2. Make API call
@@ -442,10 +439,10 @@ Ready to deploy to Render.com:
 
 ## Security
 
-⚠️ **NEVER commit .env to git** - contains private keys
-🟢 **Base Mainnet** - Production blockchain
-✅ **Zero-knowledge proofs** - Protect merchant privacy
-✅ **Public auditability** - All claims verifiable
+⚠️ NEVER commit secrets (.env) to git. Use environment variables in deployment.
+🧪 Use Base Sepolia for development; switch to Mainnet only with proper key management.
+✅ Zero-knowledge proofs (mock/real) to protect merchant privacy
+✅ Public auditability (proof verification endpoint)
 
 ## Why This Matters
 

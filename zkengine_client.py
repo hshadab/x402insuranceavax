@@ -7,6 +7,7 @@ import json
 import time
 import hashlib
 import os
+import logging
 from typing import Tuple, List
 
 
@@ -14,11 +15,12 @@ class ZKEngineClient:
     def __init__(self, binary_path: str = "./zkengine/zkengine-binary"):
         self.binary_path = binary_path
         self.use_mock = not os.path.exists(binary_path)
+        self.logger = logging.getLogger("x402insurance.zkengine")
 
         if self.use_mock:
-            print(f"⚠️  zkEngine binary not found, using MOCK mode")
+            self.logger.warning("zkEngine binary not found, using MOCK mode")
         else:
-            print(f"✅ zkEngine binary found at {binary_path}")
+            self.logger.info("zkEngine binary found at %s", binary_path)
 
     def generate_proof(
         self,
@@ -113,7 +115,7 @@ class ZKEngineClient:
 
         # If no cached proof, we can't verify without the full proof structure
         # In production, you'd store the full proof JSON and reload it
-        print("⚠️  Cannot verify proof without cached proof data")
+        self.logger.warning("Cannot verify proof without cached proof data")
         return False
 
     def evaluate_fraud(

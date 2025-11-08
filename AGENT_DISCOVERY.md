@@ -345,14 +345,14 @@ To make your service discoverable via x402 Bazaar:
       },
       coverage_amount: {
         type: "number",
-        minimum: 0.01,
-        maximum: 1.0,
+        minimum: 0.001,
+        maximum: 0.1,
         description: "Coverage amount in USDC"
       }
     }
   },
   outputSchema: { ... },
-  price: "$0.001",
+  price: "1% of coverage",
   network: "base",
   payTo: "0x..."
 }

@@ -51,10 +51,10 @@ BACKEND_WALLET_ADDRESS=0xYOUR_WALLET_ADDRESS_HERE
 BASE_RPC_URL=https://base-mainnet.g.alchemy.com/v2/YOUR_ALCHEMY_KEY
 ```
 
-**Optional - Already set in render.yaml (can override):**
+**Optional:**
 ```
-DEFAULT_PREMIUM_USDC=0.001
-MAX_COVERAGE_USDC=1
+PREMIUM_PERCENTAGE=0.01
+MAX_COVERAGE_USDC=0.1
 POLICY_DURATION_HOURS=24
 ```
 

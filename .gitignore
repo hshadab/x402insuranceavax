@@ -56,7 +56,7 @@ htmlcov/
 Thumbs.db
 
 # zkEngine
-zkengine/zkengine-binary
+zkengine/*
 
 # Data files (JSON storage - regenerated on server)
 data/

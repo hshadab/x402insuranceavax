@@ -17,9 +17,9 @@ info:
     4. Server verifies payment and processes request
 
     ## Pricing
-    - Insurance Premium: 0.001 USDC ($0.001 - 1/10th of a cent)
-    - Coverage Range: 0.01 - 1.00 USDC
-    - Protection Ratio: Up to 1000x coverage
+    - Premium: 1% of requested coverage amount
+    - Coverage Range: 0.001 - 0.1 USDC (micropayments)
+    - Protection Ratio: Up to 100x coverage
 
     ## Zero-Knowledge Proofs
     All fraud claims are verified using zkEngine (Nova/Arecibo SNARKs).
@@ -35,8 +35,8 @@ info:
 servers:
   - url: http://localhost:8000
     description: Local development server
-  - url: https://x402-insurance.onrender.com
-    description: Production server (Render)
+  - url: https://your-domain.example.com
+    description: Production server (placeholder)
 
 tags:
   - name: discovery
@@ -136,10 +136,10 @@ paths:
     post:
       summary: Create Insurance Policy
       description: |
-        Create a new insurance policy. Requires x402 payment of premium amount.
+        Create a new insurance policy. Requires x402 payment of the premium amount.
 
         **x402 Payment Required:**
-        - Premium: 0.001 USDC (1000 units with 6 decimals)
+        - Premium: percentage-based (1% of requested coverage)
         - Asset: USDC on Base Mainnet
         - Network: base
 
@@ -335,24 +335,33 @@ components:
         premium:
           type: object
           properties:
-            amount:
+            model:
+              type: string
+              example: percentage-based
+            percentage:
               type: number
-              example: 0.001
+              example: 0.01
+            percentage_display:
+              type: string
+              example: "1%"
+            calculation:
+              type: string
+              example: "premium = coverage × percentage"
             currency:
               type: string
               example: "USDC"
-            display:
+            network:
               type: string
-              example: "$0.001 (1/10th of a cent)"
+              example: "base"
         coverage:
           type: object
           properties:
             min:
               type: number
-              example: 0.01
+              example: 0.001
             max:
               type: number
-              example: 1.0
+              example: 0.1
             currency:
               type: string
               example: "USDC"
@@ -448,8 +457,8 @@ components:
           example: "https://api.example.com/data"
         coverage_amount:
           type: number
-          minimum: 0.01
-          maximum: 1.0
+          minimum: 0.001
+          maximum: 0.1
           description: Coverage amount in USDC
           example: 0.01
 
