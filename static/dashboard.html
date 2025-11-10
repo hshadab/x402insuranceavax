@@ -813,7 +813,7 @@
         <h1 class="hero-title">x402 Insurance</h1>
         <h2 class="hero-subtitle">USDC Refunds for AI Agents</h2>
         <p class="hero-description">
-            Zero-knowledge proof verified insurance against micropayment fraud. Protect your AI agents' API calls with publicly verifiable proofs powered by <a href="https://www.novanet.xyz/" target="_blank" style="color: var(--accent-primary); text-decoration: none;">NovaNet</a>.
+            Zero-knowledge proof verified insurance for API failures and downtime. Protect your AI agents when services fail with publicly verifiable proofs powered by <a href="https://www.novanet.xyz/" target="_blank" style="color: var(--accent-primary); text-decoration: none;">NovaNet</a>.
         </p>
         <div class="hero-badges">
             <a href="https://github.com/ICME-Lab/zkEngine_dev/tree/main" target="_blank" class="badge" style="text-decoration: none; color: var(--accent-primary);">
@@ -998,11 +998,11 @@ USDC: 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913
             <div style="line-height: 1.8; color: var(--text-secondary);">
                 <p style="margin-bottom: 15px;">
                     <strong style="color: var(--accent-primary);">1. Agents Buy Insurance</strong><br/>
-                    Agents pay a premium (1% of coverage amount) via x402 protocol to insure against merchant fraud. Payments are verified on-chain.
+                    Agents pay a premium (1% of coverage amount) via x402 protocol to insure against API failures and service downtime. Payments are verified on-chain.
                 </p>
                 <p style="margin-bottom: 15px;">
                     <strong style="color: var(--accent-primary);">2. zkEngine Generates Proofs</strong><br/>
-                    When agent submits fraud claim, zkEngine analyzes the HTTP response and generates a zero-knowledge proof. The proof cryptographically certifies that fraud conditions were met (e.g., status >= 500) without exposing the actual response data—like proving you know a password without revealing the password itself.
+                    When an agent submits a claim, zkEngine analyzes the HTTP response and generates a zero-knowledge proof. The proof cryptographically certifies that failure conditions were met (e.g., status >= 500, empty response) without exposing the actual response data—like proving you know a password without revealing the password itself.
                 </p>
                 <p>
                     <strong style="color: var(--accent-primary);">3. Automatic USDC Refunds</strong><br/>
@@ -1010,8 +1010,8 @@ USDC: 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913
                 </p>
             </div>
             <div class="code-block" style="margin-top: 20px;">
-# Fraud Detection Logic (proven in zero-knowledge)
-def detect_fraud(http_status, body_length):
+# Failure Detection Logic (proven in zero-knowledge)
+def detect_failure(http_status, body_length):
     if http_status >= 500:  # Server error
         return True
     if body_length == 0:     # Empty response
@@ -1206,7 +1206,7 @@ def detect_fraud(http_status, body_length):
                                     <div class="timeline-detail-value">${processingTime}s</div>
                                 </div>
                                 <div class="timeline-detail-item">
-                                    <div class="timeline-detail-label">✓ Fraud Detected</div>
+                                    <div class="timeline-detail-label">✓ Failure Detected</div>
                                     <div class="timeline-detail-value">${decoded.fraudDetected ? 'Yes' : 'No'}</div>
                                 </div>
                             </div>
@@ -1269,7 +1269,7 @@ def detect_fraud(http_status, body_length):
                                     <div class="verification-field">
                                         <div class="verification-label">📊 Public Inputs (Decoded)</div>
                                         <div class="public-inputs-decoded">
-                                            <div>• Fraud Detected: <strong>${decoded.fraudDetected ? 'Yes ✓' : 'No'}</strong></div>
+                                            <div>• Failure Detected: <strong>${decoded.fraudDetected ? 'Yes ✓' : 'No'}</strong></div>
                                             <div>• HTTP Status: <strong>${decoded.httpStatus}</strong></div>
                                             <div>• Body Length: <strong>${decoded.bodyLength} bytes</strong></div>
                                             <div>• Payout Amount: <strong>$${(decoded.payoutAmount / 1000000).toFixed(4)} USDC</strong></div>

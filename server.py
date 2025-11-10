@@ -7,7 +7,7 @@ Endpoints:
   GET  /api - API info JSON (for agents)
   GET  /api/dashboard - Dashboard data (live stats)
   POST /insure - Create insurance policy (requires x402 payment)
-  POST /claim - Submit fraud claim
+  POST /claim - Submit failure claim
   POST /verify - Verify proof (public)
   GET  /proofs/<claim_id> - Get proof data (public)
   GET  /health - Health check with dependency status
@@ -278,11 +278,11 @@ def process_claim_async(claim_id: str):
             return
 
         # Parse public inputs
-        is_fraud = public_inputs[0]
-        if is_fraud != 1:
-            logger.warning("No fraud detected for claim: %s", claim_id)
+        is_failure = public_inputs[0]
+        if is_failure != 1:
+            logger.warning("No failure detected for claim: %s", claim_id)
             claim['status'] = 'failed'
-            claim['error'] = 'No fraud detected in HTTP response'
+            claim['error'] = 'No failure detected in HTTP response'
             claims[claim_id] = claim
             save_data(CLAIMS_FILE, claims)
             return
@@ -363,7 +363,7 @@ def api_info():
         "service": "x402 Insurance API",
         "version": "1.0.0",
         "x402Version": 1,
-        "description": "ZKP-verified insurance against x402 merchant fraud. Protect your micropayment API calls with zero-knowledge proof verified insurance.",
+        "description": "ZKP-verified insurance for x402 API failures. Protect your micropayment API calls from service downtime and errors with zero-knowledge proof verified insurance.",
         "category": "insurance",
         "provider": "x402 Insurance",
         "endpoints": {
@@ -655,7 +655,7 @@ def agent_card():
         "agentCardVersion": "1.0",
         "identity": {
             "name": "x402 Insurance",
-            "description": "Zero-knowledge proof verified insurance against x402 merchant fraud. Protect your micropayment API calls with instant refunds.",
+            "description": "Zero-knowledge proof verified insurance against x402 service failures. Protect your micropayment API calls with instant refunds.",
             "provider": "x402 Insurance",
             "version": "1.0.0",
             "url": base_url,
@@ -773,7 +773,7 @@ def agent_card():
             {
                 "id": "verify-proof",
                 "name": "Verify Zero-Knowledge Proof",
-                "description": "Public endpoint to verify zkp proofs. Anyone can verify fraud claims.",
+                "description": "Public endpoint to verify zkp proofs. Anyone can verify failure claims.",
                 "endpoint": f"{base_url}/verify",
                 "method": "POST",
                 "x402Required": False,
@@ -790,7 +790,7 @@ def agent_card():
                     "type": "object",
                     "properties": {
                         "valid": {"type": "boolean"},
-                        "fraud_detected": {"type": "boolean"},
+                        "failure_detected": {"type": "boolean"},
                         "payout_amount": {"type": "number"}
                     }
                 }
@@ -798,7 +798,7 @@ def agent_card():
         ],
         "metadata": {
             "category": "insurance",
-            "tags": ["insurance", "x402", "zkp", "micropayments", "fraud-protection"],
+            "tags": ["insurance", "x402", "zkp", "micropayments", "failure-protection"],
             "pricing": {
                 "model": "percentage-based",
                 "percentage": PREMIUM_PERCENTAGE,
@@ -1201,7 +1201,7 @@ def renew_policy():
 @limiter.limit("5 per hour")
 def claim():
     """
-    Submit fraud claim (supports async processing)
+    Submit failure claim (supports async processing)
 
     Query params (optional):
       async: bool (default: false) - If true, returns immediately with status "processing"
@@ -1354,16 +1354,16 @@ def claim():
         return jsonify({"error": "Generated proof is invalid (internal error)"}), 500
 
     # Parse public inputs
-    is_fraud = public_inputs[0]
+    is_failure = public_inputs[0]
     detected_status = public_inputs[1]
     body_length = public_inputs[2]
     zkengine_payout = public_inputs[3]  # zkEngine's suggested payout (may be hardcoded)
 
-    if is_fraud != 1:
-        return jsonify({"error": "No fraud detected in HTTP response"}), 400
+    if is_failure != 1:
+        return jsonify({"error": "No failure detected in HTTP response"}), 400
 
     # Use policy coverage amount as payout (parametric insurance)
-    # zkEngine proves fraud occurred, we pay the full coverage amount
+    # zkEngine proves failure occurred, we pay the full coverage amount
     payout_amount = policy.get("coverage_amount")
 
     # Issue USDC refund
@@ -1477,7 +1477,7 @@ def verify():
     Returns:
       {
         "valid": true,
-        "fraud_detected": true,
+        "failure_detected": true,
         "payout_amount": 10000
       }
     """
@@ -1491,13 +1491,13 @@ def verify():
     try:
         is_valid = zkengine.verify_proof(proof, public_inputs)
 
-        fraud_detected = public_inputs[0] == 1 if len(public_inputs) > 0 else False
+        failure_detected = public_inputs[0] == 1 if len(public_inputs) > 0 else False
         payout_amount = public_inputs[3] if len(public_inputs) > 3 else 0
 
         return jsonify({
             "valid": is_valid,
             "public_inputs": public_inputs,
-            "fraud_detected": fraud_detected,
+            "failure_detected": failure_detected,
             "payout_amount": payout_amount
         })
 

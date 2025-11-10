@@ -426,7 +426,7 @@
             </h2>
             <div class="section-content">
                 <p>
-                    <strong>x402 Insurance</strong> provides zero-knowledge proof verified insurance against micropayment fraud. AI agents can purchase insurance policies that protect against merchant fraud during x402 payment protocol interactions.
+                    <strong>x402 Insurance</strong> provides zero-knowledge proof verified insurance for API failures and service downtime. AI agents can purchase insurance policies that protect against service interruptions, server errors, and timeouts during x402 payment protocol interactions.
                 </p>
 
                 <div class="info-box">
@@ -492,7 +492,7 @@
 
                 <p><strong>Public Endpoints:</strong></p>
                 <ul>
-                    <li><code>POST /claim</code> - Submit fraud claims (no payment required)</li>
+                    <li><code>POST /claim</code> - Submit failure claims (no payment required)</li>
                     <li><code>POST /verify</code> - Verify zero-knowledge proofs</li>
                     <li><code>GET /proofs/:id</code> - Download proof data</li>
                 </ul>
@@ -545,7 +545,7 @@
                         <span class="badge required">x402 PAYMENT REQUIRED</span>
                     </div>
                     <p class="endpoint-description">
-                        Purchase an insurance policy. Agents pay a premium (1% of coverage amount) via x402 protocol to insure against merchant fraud for 24 hours.
+                        Purchase an insurance policy. Agents pay a premium (1% of coverage amount) via x402 protocol to insure against API failures and service downtime for 24 hours.
                     </p>
 
                     <div class="endpoint-section-title">Headers:</div>
@@ -597,7 +597,7 @@
                         <span class="badge public">PUBLIC</span>
                     </div>
                     <p class="endpoint-description">
-                        Submit a fraud claim with HTTP response evidence. The zkEngine will generate a zero-knowledge proof and automatically issue a refund if fraud is detected.
+                        Submit a claim with HTTP response evidence. The zkEngine will generate a zero-knowledge proof and automatically issue a refund if a service failure is detected.
                     </p>
 
                     <div class="endpoint-section-title">Request Body:</div>
@@ -616,7 +616,7 @@
                     <div class="code-block">{
   "claim_id": "claim-abc123",
   "proof": "0xdef456...",  <span class="comment">// ZK proof hash</span>
-  "public_inputs": [1, 503, 0, 10000],  <span class="comment">// [is_fraud, status, body_len, payout]</span>
+  "public_inputs": [1, 503, 0, 10000],  <span class="comment">// [is_failure, status, body_len, payout]</span>
   "proof_generation_time_ms": 15234,
   "verification_result": true,
   "payout_amount": 0.01,
@@ -624,11 +624,11 @@
   "status": "paid"
 }</div>
 
-                    <div class="endpoint-section-title">Fraud Detection Criteria:</div>
+                    <div class="endpoint-section-title">Failure Detection Criteria:</div>
                     <table>
                         <tr>
                             <th>Condition</th>
-                            <th>Fraud?</th>
+                            <th>Covered?</th>
                         </tr>
                         <tr>
                             <td>HTTP status ≥ 500 (server error)</td>
@@ -701,7 +701,7 @@
                     <div class="endpoint-section-title">Response (200 OK):</div>
                     <div class="code-block">{
   "valid": true,
-  "fraud_detected": true,  <span class="comment">// public_inputs[0] == 1</span>
+  "failure_detected": true,  <span class="comment">// public_inputs[0] == 1</span>
   "payout_amount": 10000   <span class="comment">// public_inputs[3]</span>
 }</div>
 
@@ -714,8 +714,8 @@
                         </tr>
                         <tr>
                             <td>0</td>
-                            <td><code>is_fraud</code></td>
-                            <td>1 if fraud detected, 0 otherwise</td>
+                            <td><code>is_failure</code></td>
+                            <td>1 if failure detected, 0 otherwise</td>
                         </tr>
                         <tr>
                             <td>1</td>
@@ -971,7 +971,7 @@ Body: { ... }</div>
                     </li>
 
                     <li>
-                        <strong>If Fraud Occurs, Submit Claim</strong>
+                        <strong>If Service Fails, Submit Claim</strong>
                         <div class="code-block">POST /claim
 Body: {
   policy_id: "...",
@@ -983,17 +983,17 @@ Body: {
                     <li>
                         <strong>Receive Automatic Refund</strong>
                         <div class="code-block"><span class="comment"># zkEngine generates proof (10-20 sec)</span>
-<span class="comment"># If proof validates fraud, USDC refund issued automatically</span>
+<span class="comment"># If proof validates failure, USDC refund issued automatically</span>
 Response: {
   refund_tx_hash: "0x789...",
   payout_amount: 0.01
 }</div>
-                        <p>zkEngine proves fraud in zero-knowledge, triggers instant USDC refund on Base.</p>
+                        <p>zkEngine proves failure in zero-knowledge, triggers instant USDC refund on Base.</p>
                     </li>
                 </ol>
 
                 <div class="info-box">
-                    <strong><svg style="width: 18px; height: 18px; margin-right: 8px; vertical-align: middle; opacity: 0.6;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Privacy Preserved:</strong> Zero-knowledge proofs ensure merchant API response details remain private while publicly proving fraud was correctly detected.
+                    <strong><svg style="width: 18px; height: 18px; margin-right: 8px; vertical-align: middle; opacity: 0.6;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Privacy Preserved:</strong> Zero-knowledge proofs ensure service API response details remain private while publicly proving the failure was correctly detected.
                 </div>
             </div>
         </div>
@@ -1042,7 +1042,7 @@ merchant_response = requests.post(
     json={"query": "example"}
 )
 
-<span class="comment"># 3. If fraud occurs, submit claim</span>
+<span class="comment"># 3. If service fails, submit claim</span>
 if merchant_response.status_code >= 500:
     claim_response = requests.post(
         "https://insurance.x402.com/claim",
@@ -1098,7 +1098,7 @@ const merchantResponse = await fetch('https://api.merchant.com/service', {
   body: JSON.stringify({ query: 'example' })
 });
 
-<span class="comment">// 3. Submit claim if fraud detected</span>
+<span class="comment">// 3. Submit claim if service fails</span>
 if (merchantResponse.status >= 500) {
   const claimResponse = await fetch('https://insurance.x402.com/claim', {
     method: 'POST',
@@ -1241,7 +1241,7 @@ if (merchantResponse.status >= 500) {
                     <li>✅ Implement retry logic with exponential backoff</li>
                     <li>✅ Verify proofs independently using <code>POST /verify</code></li>
                     <li>✅ Monitor refund transactions on Basescan</li>
-                    <li>❌ Don't spam claims - only submit for genuine fraud</li>
+                    <li>❌ Don't spam claims - only submit for genuine service failures</li>
                     <li>❌ Don't purchase policies with coverage > $0.1 USDC (current limit)</li>
                 </ul>
 

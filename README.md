@@ -1,9 +1,9 @@
 # x402 Insurance
 
-**Zero-Knowledge Proof Verified Insurance Against x402 Merchant Fraud**
+**Zero-Knowledge Proof Verified Insurance for x402 API Failures**
 
-Protect your AI agents' micropayment API calls with instant, cryptographically-verified
-refunds on Base Mainnet.
+Protect your AI agents from API downtime, timeouts, and service interruptions with instant,
+cryptographically-verified refunds on Base Mainnet.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![x402 Protocol](https://img.shields.io/badge/x402-Compatible-blue)](https://github.com/coinbase/x402)
@@ -16,26 +16,28 @@ Date: 2025-11-08
 
 ## The Problem
 
-AI agents pay for x402 APIs but have **zero recourse** when merchants fail:
-- Return empty responses (HTTP 200 with no data)
-- Fail with server errors (503, 500, 502)
-- Go offline after receiving payment
+AI agents pay for x402 APIs but have **zero recourse** when services fail:
+- Server errors (503, 500, 502) from overload or bugs
+- Empty responses from timeouts or crashes
+- Service downtime during maintenance or outages
 
 **Your USDC is gone forever.** x402 has no refund mechanism. ([GitHub Issue #508](https://github.com/coinbase/x402/issues/508))
 
+APIs fail constantly - not from fraud, but from normal operational issues. Your agents shouldn't lose money when this happens.
+
 ## Our Solution
 
-**Micropayment Insurance for x402 Agents:**
+**API Failure Insurance for x402 Agents:**
 
-Pay a 1% premium → Get coverage (up to $0.1 USDC per claim) → If merchant fails, instant refund
+Pay a 1% premium → Get coverage (up to $0.1 USDC per claim) → If API fails, instant refund
 
 ✅ **1% Percentage Premium** - Pay only 1% of your coverage amount
 ✅ **Up to 100x Protection** - Get 100% coverage for just 1% cost
 ✅ **Instant USDC Refunds** - Get your money back in 15-30 seconds
-✅ **Zero-Knowledge Proofs** - Fraud verification using zkEngine SNARKs
+✅ **Zero-Knowledge Proofs** - Failure verification using zkEngine SNARKs
 ✅ **Agent Discoverable** - Full x402 Bazaar compatibility
 ✅ **Public Auditability** - Anyone can verify we paid legitimate claims
-✅ **Privacy-Preserving** - Merchant identity & API content stay private
+✅ **Privacy-Preserving** - Service identity & API content stay private
 ✅ **x402 Native (prototype)** - Minimal payment verification for testing
 
 ## How It Works
@@ -51,17 +53,17 @@ Pay a 1% premium → Get coverage (up to $0.1 USDC per claim) → If merchant fa
    → Merchant receives payment (they keep it regardless)
    → Example: Agent pays 0.01 USDC for API call
                     ↓
-3. Merchant fails: Returns 503 error / empty response / goes offline
+3. API/Service fails: Returns 503 error / empty response / goes offline
                     ↓
-4. Agent submits fraud claim with HTTP response data
+4. Agent submits claim with HTTP response data
                     ↓
 5. zkEngine analyzes the HTTP response and generates zero-knowledge proof (~15s)
-   → Cryptographically certifies fraud conditions were met (e.g., status >= 500)
+   → Cryptographically certifies failure conditions were met (e.g., status >= 500)
    → Without exposing actual response data—like proving you know a password
      without revealing the password itself
                     ↓
 6. Proof verified → We pay agent X USDC FROM OUR RESERVES
-   → Merchant keeps their payment, we absorb the loss
+   → Service keeps their payment, we absorb the loss
    → Example: Agent receives 0.01 USDC refund (100% of coverage)
                     ↓
 7. Public proof published on-chain
@@ -78,7 +80,7 @@ Pay a 1% premium → Get coverage (up to $0.1 USDC per claim) → If merchant fa
 - **0.05 USDC coverage** → 0.0005 USDC premium (1%) = 100x protection
 - **0.1 USDC coverage** → 0.001 USDC premium (1%) = 100x protection
 
-**Important:** This is insurance (we pay from reserves), not chargebacks (reversing merchant payment). From the agent's perspective, the outcome is the same: money back when merchant fails.
+**Important:** This is insurance (we pay from reserves), not chargebacks (reversing service payment). From the agent's perspective, the outcome is the same: money back when the API fails to deliver.
 
 ### Solving the Agent Memory Problem
 
@@ -96,41 +98,43 @@ Pay a 1% premium → Get coverage (up to $0.1 USDC per claim) → If merchant fa
 - Enables autonomous claim filing without human intervention
 - Compatible with all agent frameworks (no special storage required)
 
-### Fraud Detection Rules
+### Failure Detection Rules
 
-**We issue refunds when merchants:**
+**We issue refunds when services:**
 - Return HTTP status >= 500 (server errors: 500, 502, 503, 504)
 - Return empty response body (0 bytes)
 - Become unresponsive or timeout
 
 **We do NOT refund when:**
-- HTTP 200-299 (successful responses, even if content is bad)
+- HTTP 200-299 (successful responses, even if content is unexpected)
 - HTTP 400-499 (client errors - agent's fault)
-- Response has content (even if it's garbage)
+- Response has content (service delivered something)
+
+**This covers normal operational failures:** server overload, crashes, maintenance, bugs, network issues - not malicious behavior.
 
 ### Why Zero-Knowledge Proofs?
 
-**Problem:** How do we prove merchant failed without exposing private data?
+**Problem:** How do we prove an API failed without exposing private data?
 
-**Solution:** zkEngine SNARKs prove the fraud mathematically
+**Solution:** zkEngine SNARKs prove the failure mathematically
 
 **What gets proven (public):**
 - ✅ HTTP status was >= 500 OR body length was 0
-- ✅ Fraud detection logic executed correctly
+- ✅ Failure detection logic executed correctly
 - ✅ Payout amount ≤ policy coverage
 - ✅ Agent had an active policy
 
 **What stays private (hidden):**
 - 🔒 Actual API response content
-- 🔒 Merchant URL/identity (only hash visible)
+- 🔒 Service URL/identity (only hash visible)
 - 🔒 HTTP headers and metadata
 - 🔒 Business logic details
 
 **Three Key Benefits:**
 
-1. **Public Auditability** - Anyone can verify we're paying legitimate claims (prevents us from fraud)
-2. **Privacy Preservation** - Merchant identity protected, no public shaming
-3. **Trustless Verification** - Math proves fraud, not our word (future: fully on-chain)
+1. **Public Auditability** - Anyone can verify we're paying legitimate claims (prevents us from abuse)
+2. **Privacy Preservation** - Service identity protected, no public shaming for downtime
+3. **Trustless Verification** - Math proves failure, not our word (future: fully on-chain)
 
 **Technology:** zkEngine with Nova/Spartan SNARKs on Bn256 curve
 
