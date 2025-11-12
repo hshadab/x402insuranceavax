@@ -924,12 +924,18 @@ def agent_card():
 @app.route('/health')
 def health():
     """
-    Comprehensive health check with dependency status.
+    Health check with optional detailed checks.
+
+    Query params:
+        full=true - Include blockchain checks (may be slow/rate limited)
 
     Returns:
         200: All systems operational
         503: System degraded or critical issues
     """
+    # Skip blockchain checks by default to avoid rate limiting
+    include_blockchain = request.args.get('full', 'false').lower() == 'true'
+
     health_data = {
         "status": "healthy",
         "timestamp": iso_utc_now(),
@@ -957,59 +963,65 @@ def health():
         health_data["checks"]["zkengine"] = {"status": "error", "error": str(e)}
         is_degraded = True
 
-    # 2. Blockchain RPC Check
-    try:
-        bc_connected = blockchain.w3.is_connected() if blockchain else False
-        if bc_connected:
-            # Get additional blockchain info
-            try:
-                chain_id = blockchain.w3.eth.chain_id
-                block_number = blockchain.w3.eth.block_number
-                gas_price = blockchain.w3.eth.gas_price
-                health_data["checks"]["blockchain"] = {
-                    "status": "connected",
-                    "chain_id": chain_id,
-                    "latest_block": block_number,
-                    "gas_price_gwei": float(blockchain.w3.from_wei(gas_price, 'gwei'))
-                }
-            except Exception:
-                health_data["checks"]["blockchain"] = {"status": "connected"}
-        else:
-            health_data["checks"]["blockchain"] = {"status": "disconnected"}
+    # 2. Blockchain RPC Check (only if requested with ?full=true)
+    if include_blockchain:
+        try:
+            bc_connected = blockchain.w3.is_connected() if blockchain else False
+            if bc_connected:
+                # Get additional blockchain info
+                try:
+                    chain_id = blockchain.w3.eth.chain_id
+                    block_number = blockchain.w3.eth.block_number
+                    gas_price = blockchain.w3.eth.gas_price
+                    health_data["checks"]["blockchain"] = {
+                        "status": "connected",
+                        "chain_id": chain_id,
+                        "latest_block": block_number,
+                        "gas_price_gwei": float(blockchain.w3.from_wei(gas_price, 'gwei'))
+                    }
+                except Exception:
+                    health_data["checks"]["blockchain"] = {"status": "connected"}
+            else:
+                health_data["checks"]["blockchain"] = {"status": "disconnected"}
+                is_healthy = False
+        except Exception as e:
+            health_data["checks"]["blockchain"] = {"status": "error", "error": str(e)}
             is_healthy = False
-    except Exception as e:
-        health_data["checks"]["blockchain"] = {"status": "error", "error": str(e)}
-        is_healthy = False
+    else:
+        health_data["checks"]["blockchain"] = {"status": "skipped", "info": "Use ?full=true for blockchain checks"}
 
-    # 3. Wallet Check
-    try:
-        has_wallet = getattr(blockchain, 'has_wallet', False)
-        if has_wallet:
-            # Check wallet balances
-            wallet_address = config.BACKEND_WALLET_ADDRESS
-            eth_balance = blockchain.w3.eth.get_balance(wallet_address)
-            usdc_balance = blockchain.get_usdc_balance()
+    # 3. Wallet Check (only if blockchain checks enabled)
+    if include_blockchain:
+        try:
+            has_wallet = getattr(blockchain, 'has_wallet', False)
+            if has_wallet:
+                # Check wallet balances
+                wallet_address = config.BACKEND_WALLET_ADDRESS
+                eth_balance = blockchain.w3.eth.get_balance(wallet_address)
+                usdc_balance = blockchain.get_usdc_balance()
 
-            health_data["checks"]["wallet"] = {
-                "status": "configured",
-                "address": wallet_address,
-                "eth_balance": float(blockchain.w3.from_wei(eth_balance, 'ether')),
-                "usdc_balance": usdc_balance
-            }
+                health_data["checks"]["wallet"] = {
+                    "status": "configured",
+                    "address": wallet_address,
+                    "eth_balance": float(blockchain.w3.from_wei(eth_balance, 'ether')),
+                    "usdc_balance": usdc_balance
+                }
 
-            # Warning if balances are low
-            if eth_balance < blockchain.w3.to_wei(0.001, 'ether'):
-                health_data["checks"]["wallet"]["warning"] = "Low ETH balance for gas"
+                # Warning if balances are low
+                if eth_balance < blockchain.w3.to_wei(0.001, 'ether'):
+                    health_data["checks"]["wallet"]["warning"] = "Low ETH balance for gas"
+                    is_degraded = True
+                if usdc_balance < 0.1:
+                    health_data["checks"]["wallet"]["warning"] = "Low USDC balance for refunds"
+                    is_degraded = True
+            else:
+                health_data["checks"]["wallet"] = {"status": "not_configured"}
                 is_degraded = True
-            if usdc_balance < 0.1:
-                health_data["checks"]["wallet"]["warning"] = "Low USDC balance for refunds"
-                is_degraded = True
-        else:
-            health_data["checks"]["wallet"] = {"status": "not_configured"}
+        except Exception as e:
+            health_data["checks"]["wallet"] = {"status": "error", "error": str(e)}
             is_degraded = True
-    except Exception as e:
-        health_data["checks"]["wallet"] = {"status": "error", "error": str(e)}
-        is_degraded = True
+    else:
+        health_data["checks"]["wallet"] = {"status": "skipped"}
 
     # 4. Database Check
     try:
@@ -1027,40 +1039,44 @@ def health():
         health_data["checks"]["database"] = {"status": "error", "error": str(e)}
         is_healthy = False
 
-    # 5. Reserve Health Check
-    try:
-        if has_wallet:
-            policies = database.get_all_policies()
-            active_policies = [p for p in policies.values() if p.get('status') == 'active']
-            total_coverage = sum(p.get('coverage_amount', 0) for p in active_policies)
+    # 5. Reserve Health Check (only if blockchain checks enabled)
+    if include_blockchain:
+        try:
+            has_wallet = getattr(blockchain, 'has_wallet', False)
+            if has_wallet:
+                policies = database.get_all_policies()
+                active_policies = [p for p in policies.values() if p.get('status') == 'active']
+                total_coverage = sum(p.get('coverage_amount', 0) for p in active_policies)
 
-            if total_coverage > 0:
-                usdc_balance = blockchain.get_usdc_balance()
-                reserve_ratio = usdc_balance / total_coverage
-                min_reserve_ratio = config.MIN_RESERVE_RATIO
+                if total_coverage > 0:
+                    usdc_balance = blockchain.get_usdc_balance()
+                    reserve_ratio = usdc_balance / total_coverage
+                    min_reserve_ratio = config.MIN_RESERVE_RATIO
 
-                health_data["checks"]["reserves"] = {
-                    "status": "healthy" if reserve_ratio >= min_reserve_ratio else "low",
-                    "usdc_balance": usdc_balance,
-                    "total_coverage": total_coverage,
-                    "reserve_ratio": round(reserve_ratio, 2),
-                    "min_ratio": min_reserve_ratio
-                }
+                    health_data["checks"]["reserves"] = {
+                        "status": "healthy" if reserve_ratio >= min_reserve_ratio else "low",
+                        "usdc_balance": usdc_balance,
+                        "total_coverage": total_coverage,
+                        "reserve_ratio": round(reserve_ratio, 2),
+                        "min_ratio": min_reserve_ratio
+                    }
 
-                if reserve_ratio < 1.0:
-                    health_data["checks"]["reserves"]["status"] = "critical"
-                    is_healthy = False
-                elif reserve_ratio < min_reserve_ratio:
-                    health_data["checks"]["reserves"]["status"] = "low"
-                    is_degraded = True
-            else:
-                health_data["checks"]["reserves"] = {
-                    "status": "healthy",
-                    "message": "No active policies"
-                }
-    except Exception as e:
-        health_data["checks"]["reserves"] = {"status": "error", "error": str(e)}
-        is_degraded = True
+                    if reserve_ratio < 1.0:
+                        health_data["checks"]["reserves"]["status"] = "critical"
+                        is_healthy = False
+                    elif reserve_ratio < min_reserve_ratio:
+                        health_data["checks"]["reserves"]["status"] = "low"
+                        is_degraded = True
+                else:
+                    health_data["checks"]["reserves"] = {
+                        "status": "healthy",
+                        "message": "No active policies"
+                    }
+        except Exception as e:
+            health_data["checks"]["reserves"] = {"status": "error", "error": str(e)}
+            is_degraded = True
+    else:
+        health_data["checks"]["reserves"] = {"status": "skipped"}
 
     # 6. Payment Verifier Check
     try:
