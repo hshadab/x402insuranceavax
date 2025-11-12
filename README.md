@@ -188,7 +188,7 @@ Every insurance flow involves **three on-chain transactions** on Base Mainnet:
 **Example Claim:**
 - Refund TX: `0x29c71c423d09ca6101456e458b68022008b541ef78fa9cc76b399e45a3497a62`
 - Proof TX: `0x[proof_publication_tx]`
-- View on Basescan: https://basescan.org/address/0xf36B80afFb2e41418874FfA56B069f1Fe671FC35
+- View on Basescan: https://basescan.org/address/0xA7c563342543fBa03707EEa79fb5Aaad80228bC5
 
 ## Quick Start
 

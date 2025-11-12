@@ -58,8 +58,8 @@ Check progress: https://github.com/hshadab/x402insurance/actions
 
 **Environment Variables to Set:**
 ```bash
-BACKEND_WALLET_PRIVATE_KEY=0x22af9bb0c38c6a666a13f51155720cc3c1af64dfd69f0aeb99cb4e7cd4a0d165
-BACKEND_WALLET_ADDRESS=0xf36B80afFb2e41418874FfA56B069f1Fe671FC35
+BACKEND_WALLET_PRIVATE_KEY=<your-private-key>
+BACKEND_WALLET_ADDRESS=<your-wallet-address>
 ```
 (All other variables are in `render.yaml` or have defaults)
 

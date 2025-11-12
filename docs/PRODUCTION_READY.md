@@ -14,8 +14,8 @@
 
 ### ✅ USDC Refunds (REAL)
 - **Network**: Base Mainnet (Chain ID: 8453)
-- **Wallet**: `0xf36B80afFb2e41418874FfA56B069f1Fe671FC35`
-- **RPC**: Alchemy Base Mainnet endpoint
+- **Wallet**: `0xA7c563342543fBa03707EEa79fb5Aaad80228bC5`
+- **RPC**: Public Base Mainnet endpoint
 - **Transactions**: Multiple verified USDC transfers on Basescan
 - **Example**: https://basescan.org/tx/0x29c71c423d09ca6101456e458b68022008b541ef78fa9cc76b399e45a3497a62
 
@@ -45,7 +45,7 @@ FLASK_ENV=production
 PAYMENT_VERIFICATION_MODE=full
 BASE_RPC_URL=https://base-mainnet.g.alchemy.com/v2/[key]
 USDC_CONTRACT_ADDRESS=0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913
-BACKEND_WALLET_ADDRESS=0xf36B80afFb2e41418874FfA56B069f1Fe671FC35
+BACKEND_WALLET_ADDRESS=0xA7c563342543fBa03707EEa79fb5Aaad80228bC5
 ZKENGINE_BINARY_PATH=./zkengine/fraud_detector
 ```
 
