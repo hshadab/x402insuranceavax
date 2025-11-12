@@ -12,15 +12,16 @@ from typing import Tuple, List
 
 
 class ZKEngineClient:
-    def __init__(self, binary_path: str = "./zkengine/zkengine-binary"):
+    def __init__(self, binary_path: str = "./zkengine/zkengine-binary", timeout: int = 60):
         self.binary_path = binary_path
+        self.timeout = timeout
         self.use_mock = not os.path.exists(binary_path)
         self.logger = logging.getLogger("x402insurance.zkengine")
 
         if self.use_mock:
             self.logger.warning("zkEngine binary not found, using MOCK mode")
         else:
-            self.logger.info("zkEngine binary found at %s", binary_path)
+            self.logger.info("zkEngine binary found at %s (timeout: %ds)", binary_path, timeout)
 
     def generate_proof(
         self,
@@ -51,7 +52,7 @@ class ZKEngineClient:
             [binary_abs_path, str(http_status), str(body_length)],
             capture_output=True,
             text=True,
-            timeout=60,  # zkEngine proof generation can take time
+            timeout=self.timeout,  # Configurable timeout for zkEngine proof generation
             cwd="/tmp/zkEngine_dev"  # zkEngine needs to run from source dir to find wasm/ files
         )
 

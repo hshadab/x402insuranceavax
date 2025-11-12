@@ -1,0 +1,143 @@
+version: '3.8'
+
+services:
+  # Main Flask application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: x402-insurance-api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      # App Configuration
+      - ENV=production
+      - DEBUG=false
+      - PORT=8000
+      - HOST=0.0.0.0
+
+      # Database (use PostgreSQL in Docker)
+      - DATABASE_URL=postgresql://x402user:x402pass@postgres:5432/x402insurance
+
+      # Blockchain (set via .env file or environment variables)
+      - BASE_RPC_URL=${BASE_RPC_URL}
+      - USDC_CONTRACT_ADDRESS=${USDC_CONTRACT_ADDRESS:-0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913}
+      - BACKEND_WALLET_PRIVATE_KEY=${BACKEND_WALLET_PRIVATE_KEY}
+      - BACKEND_WALLET_ADDRESS=${BACKEND_WALLET_ADDRESS}
+
+      # zkEngine
+      - ZKENGINE_BINARY_PATH=${ZKENGINE_BINARY_PATH:-./zkengine/fraud_detector}
+
+      # Insurance parameters
+      - PREMIUM_PERCENTAGE=${PREMIUM_PERCENTAGE:-0.01}
+      - MAX_COVERAGE_USDC=${MAX_COVERAGE_USDC:-0.1}
+      - POLICY_DURATION_HOURS=${POLICY_DURATION_HOURS:-24}
+
+      # Rate limiting (use Redis)
+      - RATE_LIMIT_ENABLED=true
+      - RATE_LIMIT_STORAGE_URL=redis://redis:6379/0
+
+      # Payment verification
+      - PAYMENT_VERIFICATION_MODE=${PAYMENT_VERIFICATION_MODE:-full}
+      - PAYMENT_MAX_AGE_SECONDS=300
+
+      # Security
+      - CORS_ORIGINS=${CORS_ORIGINS:-*}
+      - REQUIRE_CLAIM_AUTHENTICATION=${REQUIRE_CLAIM_AUTHENTICATION:-true}
+
+      # Chain configuration
+      - CHAIN_ID=${CHAIN_ID:-8453}
+
+      # Monitoring (optional)
+      - SENTRY_DSN=${SENTRY_DSN:-}
+
+    volumes:
+      # Mount data directory for persistence
+      - ./data:/app/data
+      # Mount zkEngine binary if you have it locally
+      - ./zkengine:/app/zkengine
+      # Mount logs directory
+      - ./logs:/app/logs
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - x402-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: x402-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=x402insurance
+      - POSTGRES_USER=x402user
+      - POSTGRES_PASSWORD=x402pass
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - x402-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U x402user -d x402insurance"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis for distributed rate limiting
+  redis:
+    image: redis:7-alpine
+    container_name: x402-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - x402-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command: redis-server --appendonly yes
+
+  # Optional: pgAdmin for database management
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: x402-pgadmin
+    restart: unless-stopped
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@x402insurance.local
+      - PGADMIN_DEFAULT_PASSWORD=admin
+      - PGADMIN_CONFIG_SERVER_MODE=False
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    networks:
+      - x402-network
+    profiles:
+      - tools  # Only start with: docker-compose --profile tools up
+
+volumes:
+  postgres-data:
+    driver: local
+  redis-data:
+    driver: local
+  pgadmin-data:
+    driver: local
+
+networks:
+  x402-network:
+    driver: bridge

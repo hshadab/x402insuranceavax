@@ -63,6 +63,39 @@ logging.basicConfig(
 )
 logger = logging.getLogger("x402insurance")
 
+# Sentry Error Tracking
+if config.SENTRY_DSN:
+    try:
+        import sentry_sdk
+        from sentry_sdk.integrations.flask import FlaskIntegration
+        from sentry_sdk.integrations.logging import LoggingIntegration
+
+        sentry_sdk.init(
+            dsn=config.SENTRY_DSN,
+            environment=config.SENTRY_ENVIRONMENT,
+            traces_sample_rate=config.SENTRY_TRACES_SAMPLE_RATE,
+            integrations=[
+                FlaskIntegration(),
+                LoggingIntegration(
+                    level=logging.INFO,  # Capture info and above as breadcrumbs
+                    event_level=logging.ERROR  # Send errors as events
+                ),
+            ],
+            # Set release version (use git commit hash in production)
+            release=os.getenv("SENTRY_RELEASE", "x402-insurance@dev"),
+            # Configure performance monitoring
+            profiles_sample_rate=0.1,  # Profile 10% of sampled transactions
+            # Filter out health check requests from traces
+            before_send_transaction=lambda event, hint: None if event.get("request", {}).get("url", "").endswith("/health") else event,
+        )
+        logger.info("Sentry error tracking enabled (environment: %s)", config.SENTRY_ENVIRONMENT)
+    except ImportError:
+        logger.warning("Sentry SDK not installed. Install with: pip install sentry-sdk[flask]")
+    except Exception as e:
+        logger.error("Failed to initialize Sentry: %s", e)
+else:
+    logger.info("Sentry error tracking disabled (no SENTRY_DSN configured)")
+
 # CORS
 if config.CORS_ORIGINS:
     origins = [o.strip() for o in config.CORS_ORIGINS.split(',') if o.strip()]
@@ -74,10 +107,10 @@ if config.RATE_LIMIT_ENABLED:
     limiter = Limiter(
         app=app,
         key_func=get_remote_address,
-        default_limits=["200 per day", "50 per hour"],
+        default_limits=[config.RATE_LIMIT_DEFAULT],
         storage_uri=config.RATE_LIMIT_STORAGE_URL or "memory://"
     )
-    logger.info("Rate limiting enabled")
+    logger.info("Rate limiting enabled with default: %s", config.RATE_LIMIT_DEFAULT)
 else:
     # Create dummy limiter that does nothing
     class DummyLimiter:
@@ -97,7 +130,7 @@ if not BACKEND_ADDRESS:
 logger.info("Initializing services...")
 
 # zkEngine
-zkengine = ZKEngineClient(config.ZKENGINE_BINARY_PATH)
+zkengine = ZKEngineClient(config.ZKENGINE_BINARY_PATH, timeout=config.ZKENGINE_TIMEOUT)
 
 # Blockchain
 blockchain = BlockchainClient(
@@ -105,7 +138,8 @@ blockchain = BlockchainClient(
     usdc_address=config.USDC_CONTRACT_ADDRESS,
     private_key=config.BACKEND_WALLET_PRIVATE_KEY,
     max_gas_price_gwei=config.MAX_GAS_PRICE_GWEI,
-    max_retries=config.MAX_RETRIES
+    max_retries=config.MAX_RETRIES,
+    confirmation_timeout=config.BLOCKCHAIN_CONFIRMATION_TIMEOUT
 )
 
 # Database
@@ -118,9 +152,10 @@ database = DatabaseClient(
 if config.PAYMENT_VERIFICATION_MODE == "full" and BACKEND_ADDRESS:
     payment_verifier = PaymentVerifier(
         backend_address=BACKEND_ADDRESS,
-        usdc_address=config.USDC_CONTRACT_ADDRESS
+        usdc_address=config.USDC_CONTRACT_ADDRESS,
+        chain_id=config.CHAIN_ID
     )
-    logger.info("Using FULL payment verification (EIP-712 signatures)")
+    logger.info("Using FULL payment verification (EIP-712 signatures, chain_id=%d)", config.CHAIN_ID)
 else:
     payment_verifier = SimplePaymentVerifier(
         backend_address=BACKEND_ADDRESS or "0x0000000000000000000000000000000000000000",
@@ -347,8 +382,9 @@ def process_claim_async(claim_id: str):
 
 @app.before_request
 def handle_x402_payment():
-    """Capture X-Payment header for verification in /insure endpoint."""
-    if request.path == '/insure' and request.method == 'POST':
+    """Capture X-Payment header for verification in /insure, /claim, and /renew endpoints."""
+    # Capture payment headers for endpoints that may require x402 payment
+    if request.method == 'POST' and request.path in ['/insure', '/claim', '/renew']:
         g.payment_header = request.headers.get('X-Payment') or request.headers.get('X-PAYMENT')
         g.payer_header = request.headers.get('X-Payer') or request.headers.get('X-FROM-ADDRESS')
 
@@ -887,24 +923,187 @@ def agent_card():
 
 @app.route('/health')
 def health():
-    """Health check with real dependency status."""
-    zk_status = "operational" if not getattr(zkengine, 'use_mock', True) else "mock"
-    bc_connected = False
+    """
+    Comprehensive health check with dependency status.
+
+    Returns:
+        200: All systems operational
+        503: System degraded or critical issues
+    """
+    health_data = {
+        "status": "healthy",
+        "timestamp": iso_utc_now(),
+        "version": os.getenv("SENTRY_RELEASE", "dev"),
+        "environment": config.ENV if hasattr(config, 'ENV') else os.getenv('ENV', 'unknown'),
+        "checks": {}
+    }
+
+    # Track if any critical checks fail
+    is_healthy = True
+    is_degraded = False
+
+    # 1. zkEngine Check
+    try:
+        zk_using_mock = getattr(zkengine, 'use_mock', True)
+        zk_binary_exists = os.path.exists(config.ZKENGINE_BINARY_PATH) if hasattr(config, 'ZKENGINE_BINARY_PATH') else False
+        health_data["checks"]["zkengine"] = {
+            "status": "mock" if zk_using_mock else "operational",
+            "binary_exists": zk_binary_exists,
+            "mode": "mock" if zk_using_mock else "real"
+        }
+        if zk_using_mock and os.getenv('ENV') == 'production':
+            is_degraded = True
+    except Exception as e:
+        health_data["checks"]["zkengine"] = {"status": "error", "error": str(e)}
+        is_degraded = True
+
+    # 2. Blockchain RPC Check
     try:
         bc_connected = blockchain.w3.is_connected() if blockchain else False
-    except Exception:
-        bc_connected = False
-    status = "healthy" if bc_connected else "degraded"
-    return jsonify({
-        "status": status,
-        "zkengine": zk_status,
-        "blockchain": "connected" if bc_connected else "disconnected",
-        "wallet": getattr(blockchain, 'has_wallet', False)
-    })
+        if bc_connected:
+            # Get additional blockchain info
+            try:
+                chain_id = blockchain.w3.eth.chain_id
+                block_number = blockchain.w3.eth.block_number
+                gas_price = blockchain.w3.eth.gas_price
+                health_data["checks"]["blockchain"] = {
+                    "status": "connected",
+                    "chain_id": chain_id,
+                    "latest_block": block_number,
+                    "gas_price_gwei": float(blockchain.w3.from_wei(gas_price, 'gwei'))
+                }
+            except Exception:
+                health_data["checks"]["blockchain"] = {"status": "connected"}
+        else:
+            health_data["checks"]["blockchain"] = {"status": "disconnected"}
+            is_healthy = False
+    except Exception as e:
+        health_data["checks"]["blockchain"] = {"status": "error", "error": str(e)}
+        is_healthy = False
+
+    # 3. Wallet Check
+    try:
+        has_wallet = getattr(blockchain, 'has_wallet', False)
+        if has_wallet:
+            # Check wallet balances
+            wallet_address = config.BACKEND_WALLET_ADDRESS
+            eth_balance = blockchain.w3.eth.get_balance(wallet_address)
+            usdc_balance = blockchain.get_usdc_balance()
+
+            health_data["checks"]["wallet"] = {
+                "status": "configured",
+                "address": wallet_address,
+                "eth_balance": float(blockchain.w3.from_wei(eth_balance, 'ether')),
+                "usdc_balance": usdc_balance
+            }
+
+            # Warning if balances are low
+            if eth_balance < blockchain.w3.to_wei(0.001, 'ether'):
+                health_data["checks"]["wallet"]["warning"] = "Low ETH balance for gas"
+                is_degraded = True
+            if usdc_balance < 0.1:
+                health_data["checks"]["wallet"]["warning"] = "Low USDC balance for refunds"
+                is_degraded = True
+        else:
+            health_data["checks"]["wallet"] = {"status": "not_configured"}
+            is_degraded = True
+    except Exception as e:
+        health_data["checks"]["wallet"] = {"status": "error", "error": str(e)}
+        is_degraded = True
+
+    # 4. Database Check
+    try:
+        # Try to read policies
+        policies = database.get_all_policies()
+        active_policies = [p for p in policies.values() if p.get('status') == 'active']
+
+        health_data["checks"]["database"] = {
+            "status": "operational",
+            "backend": "postgresql" if config.DATABASE_URL else "json",
+            "total_policies": len(policies),
+            "active_policies": len(active_policies)
+        }
+    except Exception as e:
+        health_data["checks"]["database"] = {"status": "error", "error": str(e)}
+        is_healthy = False
+
+    # 5. Reserve Health Check
+    try:
+        if has_wallet:
+            policies = database.get_all_policies()
+            active_policies = [p for p in policies.values() if p.get('status') == 'active']
+            total_coverage = sum(p.get('coverage_amount', 0) for p in active_policies)
+
+            if total_coverage > 0:
+                usdc_balance = blockchain.get_usdc_balance()
+                reserve_ratio = usdc_balance / total_coverage
+                min_reserve_ratio = config.MIN_RESERVE_RATIO
+
+                health_data["checks"]["reserves"] = {
+                    "status": "healthy" if reserve_ratio >= min_reserve_ratio else "low",
+                    "usdc_balance": usdc_balance,
+                    "total_coverage": total_coverage,
+                    "reserve_ratio": round(reserve_ratio, 2),
+                    "min_ratio": min_reserve_ratio
+                }
+
+                if reserve_ratio < 1.0:
+                    health_data["checks"]["reserves"]["status"] = "critical"
+                    is_healthy = False
+                elif reserve_ratio < min_reserve_ratio:
+                    health_data["checks"]["reserves"]["status"] = "low"
+                    is_degraded = True
+            else:
+                health_data["checks"]["reserves"] = {
+                    "status": "healthy",
+                    "message": "No active policies"
+                }
+    except Exception as e:
+        health_data["checks"]["reserves"] = {"status": "error", "error": str(e)}
+        is_degraded = True
+
+    # 6. Payment Verifier Check
+    try:
+        payment_mode = config.PAYMENT_VERIFICATION_MODE
+        health_data["checks"]["payment_verifier"] = {
+            "status": "operational",
+            "mode": payment_mode
+        }
+        if payment_mode == "simple" and os.getenv('ENV') == 'production':
+            health_data["checks"]["payment_verifier"]["warning"] = "Simple mode not recommended for production"
+            is_degraded = True
+    except Exception as e:
+        health_data["checks"]["payment_verifier"] = {"status": "error", "error": str(e)}
+        is_degraded = True
+
+    # 7. Monitoring Check
+    try:
+        sentry_enabled = bool(config.SENTRY_DSN)
+        health_data["checks"]["monitoring"] = {
+            "status": "enabled" if sentry_enabled else "disabled",
+            "sentry": sentry_enabled
+        }
+        if not sentry_enabled and os.getenv('ENV') == 'production':
+            health_data["checks"]["monitoring"]["warning"] = "Sentry recommended for production"
+    except Exception as e:
+        health_data["checks"]["monitoring"] = {"status": "error", "error": str(e)}
+
+    # Set overall status
+    if not is_healthy:
+        health_data["status"] = "unhealthy"
+        http_status = 503
+    elif is_degraded:
+        health_data["status"] = "degraded"
+        http_status = 200
+    else:
+        health_data["status"] = "healthy"
+        http_status = 200
+
+    return jsonify(health_data), http_status
 
 
 @app.route('/insure', methods=['POST'])
-@limiter.limit("10 per hour")
+@limiter.limit(config.RATE_LIMIT_INSURE)
 def insure():
     """
     Create insurance policy
@@ -1081,7 +1280,7 @@ def get_policies():
 
 
 @app.route('/renew', methods=['POST'])
-@limiter.limit("20 per hour")
+@limiter.limit(config.RATE_LIMIT_RENEW)
 def renew_policy():
     """
     Renew/extend an existing policy before expiration.
@@ -1215,16 +1414,21 @@ def renew_policy():
 
 
 @app.route('/claim', methods=['POST'])
-@limiter.limit("5 per hour")
+@limiter.limit(config.RATE_LIMIT_CLAIM)
 def claim():
     """
     Submit failure claim (supports async processing)
+
+    x402 payment: Required if REQUIRE_CLAIM_AUTHENTICATION=true (production default)
+                  Nominal 0.0001 USDC anti-spam fee, must be policy owner
 
     Query params (optional):
       async: bool (default: false) - If true, returns immediately with status "processing"
 
     Headers (optional):
       Idempotency-Key: string (prevents duplicate claims if retried)
+      X-Payment: x402 payment proof (required if authentication enabled)
+      X-Payer: payer address (required if authentication enabled)
 
     Body:
       {
@@ -1299,6 +1503,52 @@ def claim():
     # Check expiration
     if parse_utc(policy["expires_at"]) < datetime.now(timezone.utc):
         return jsonify({"error": "Policy expired"}), 400
+
+    # Optional: Require authentication for claims (configurable via REQUIRE_CLAIM_AUTHENTICATION)
+    if config.REQUIRE_CLAIM_AUTHENTICATION:
+        # Verify that the claim is submitted by the policy owner via x402 payment proof
+        payment_header = getattr(g, 'payment_header', None)
+        payer_header = getattr(g, 'payer_header', None)
+
+        if not payment_header:
+            # Return 402 with payment requirement (nominal fee to prevent spam)
+            claim_fee_units = 100  # 0.0001 USDC nominal anti-spam fee
+            required = {
+                "x402Version": 1,
+                "payment": {
+                    "scheme": "exact",
+                    "network": "base",
+                    "amount": str(claim_fee_units),
+                    "asset": {"address": USDC_ADDRESS, "decimals": 6, "symbol": "USDC"},
+                    "pay_to": BACKEND_ADDRESS,
+                    "mimeType": "application/json",
+                    "maxTimeoutSeconds": 60,
+                    "description": "Claim submission fee (anti-spam)"
+                }
+            }
+            headers = {"X-Payment-Required": json.dumps(required["payment"])}
+            return jsonify(required), 402, headers
+
+        # Verify payment
+        payment_details = payment_verifier.verify_payment(
+            payment_header=payment_header,
+            payer_address=payer_header,
+            required_amount=claim_fee_units,
+            max_age_seconds=config.PAYMENT_MAX_AGE_SECONDS
+        )
+
+        if not payment_details.is_valid:
+            logger.warning("Claim payment verification failed for policy_id=%s", policy_id)
+            return jsonify({"error": "Payment verification failed"}), 402
+
+        # Verify that the payer owns the policy
+        agent_address = payment_details.payer
+        if agent_address.lower() != policy["agent_address"].lower():
+            return jsonify({
+                "error": "Unauthorized: You can only claim your own policies",
+                "policy_owner": policy["agent_address"],
+                "claim_submitter": agent_address
+            }), 403
 
     # Check if async mode requested
     async_mode = request.args.get('async', 'false').lower() in ('true', '1', 'yes')

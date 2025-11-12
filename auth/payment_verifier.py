@@ -40,9 +40,10 @@ class PaymentDetails:
 class PaymentVerifier:
     """Verify x402 payments with proper signature validation"""
 
-    def __init__(self, backend_address: str, usdc_address: str, nonce_storage_path: Optional[Path] = None):
+    def __init__(self, backend_address: str, usdc_address: str, nonce_storage_path: Optional[Path] = None, chain_id: int = 8453):
         self.backend_address = Web3.to_checksum_address(backend_address)
         self.usdc_address = Web3.to_checksum_address(usdc_address)
+        self.chain_id = chain_id
         self.nonce_storage_path = nonce_storage_path or Path("data/nonce_cache.json")
         self.cache_cleanup_interval = 3600  # Clean up old nonces every hour
         self.last_cleanup = time.time()
@@ -50,8 +51,8 @@ class PaymentVerifier:
         # Load nonce cache from disk if it exists (survives restarts)
         self.nonce_cache = self._load_nonce_cache()
         logger.info(
-            "PaymentVerifier initialized with %d cached nonces (persistent storage: %s)",
-            len(self.nonce_cache), self.nonce_storage_path
+            "PaymentVerifier initialized with %d cached nonces (persistent storage: %s, chain_id: %d)",
+            len(self.nonce_cache), self.nonce_storage_path, self.chain_id
         )
 
     def verify_payment(
@@ -225,7 +226,7 @@ class PaymentVerifier:
             domain_data = {
                 "name": "x402 Payment",
                 "version": "1",
-                "chainId": 8453,  # Base Mainnet
+                "chainId": self.chain_id,  # Configurable chain ID (Base Mainnet: 8453, Base Sepolia: 84532)
             }
 
             # Define message structure

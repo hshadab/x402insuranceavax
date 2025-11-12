@@ -511,8 +511,22 @@ Ready to deploy to Render.com:
 
 ## Security
 
-⚠️ NEVER commit secrets (.env) to git. Use environment variables in deployment.
-🧪 Use Base Sepolia for development; switch to Mainnet only with proper key management.
+### Recent Security Enhancements (2025-11-12)
+
+✅ **Claim Authentication** - Optional x402 payment verification for claim submission (enabled by default in production)
+✅ **Configurable Security** - CORS, rate limits, timeouts, and chain IDs now fully configurable
+✅ **Improved Credential Management** - Enhanced .env.example with security warnings and best practices
+✅ **Production Hardening** - Stricter defaults for production deployments
+
+**See**: [docs/SECURITY_IMPROVEMENTS.md](docs/SECURITY_IMPROVEMENTS.md) for detailed security enhancements and configuration guide.
+
+### Security Best Practices
+
+⚠️ **CRITICAL**: Never commit secrets (.env) to git. Use environment variables in deployment.
+⚠️ **IMPORTANT**: If .env was previously committed, remove from git history (see SECURITY_IMPROVEMENTS.md)
+🧪 Use Base Sepolia for development; switch to Mainnet only with proper key management
+🔐 Enable claim authentication in production (`REQUIRE_CLAIM_AUTHENTICATION=true`)
+🌐 Restrict CORS to your domain (`CORS_ORIGINS=https://yourdomain.com`)
 ✅ Zero-knowledge proofs (mock/real) to protect merchant privacy
 ✅ Public auditability (proof verification endpoint)
 

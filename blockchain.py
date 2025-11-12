@@ -43,11 +43,13 @@ class BlockchainClient:
         usdc_address: str,
         private_key: str = None,
         max_gas_price_gwei: int = 100,
-        max_retries: int = 3
+        max_retries: int = 3,
+        confirmation_timeout: int = 120
     ):
         self.w3 = Web3(Web3.HTTPProvider(rpc_url))
         self.max_gas_price_gwei = max_gas_price_gwei
         self.max_retries = max_retries
+        self.confirmation_timeout = confirmation_timeout
         self.has_wallet = bool(private_key)
         self.logger = logging.getLogger("x402insurance.blockchain")
 
@@ -239,7 +241,7 @@ class BlockchainClient:
             )
 
             # Wait for confirmation
-            receipt = self.w3.eth.wait_for_transaction_receipt(tx_hash, timeout=120)
+            receipt = self.w3.eth.wait_for_transaction_receipt(tx_hash, timeout=self.confirmation_timeout)
 
             if receipt.status != 1:
                 raise Exception(f"Proof publication reverted: {tx_hash.hex()}")
@@ -297,7 +299,7 @@ class BlockchainClient:
         )
 
         # Wait for confirmation with timeout
-        receipt = self.w3.eth.wait_for_transaction_receipt(tx_hash, timeout=120)
+        receipt = self.w3.eth.wait_for_transaction_receipt(tx_hash, timeout=self.confirmation_timeout)
 
         if receipt.status != 1:
             raise Exception(f"Transaction reverted: {tx_hash.hex()}")

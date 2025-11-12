@@ -33,10 +33,15 @@ env/
 *.swo
 *~
 
-# Environment
+# Environment - CRITICAL: Never commit these files!
+# NOTE: If .env was previously committed, remove from history with:
+# git filter-branch --force --index-filter 'git rm --cached --ignore-unmatch .env' --prune-empty --tag-name-filter cat -- --all
 .env
 .env.local
 .env.*.local
+.env.production
+.env.staging
+.env.development
 
 # Database
 *.db

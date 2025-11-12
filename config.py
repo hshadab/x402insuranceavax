@@ -51,6 +51,10 @@ class Config:
     # Rate limiting
     RATE_LIMIT_ENABLED = os.getenv("RATE_LIMIT_ENABLED", "true").lower() in ["1", "true", "yes"]
     RATE_LIMIT_STORAGE_URL = os.getenv("RATE_LIMIT_STORAGE_URL")  # Redis URL (optional)
+    RATE_LIMIT_DEFAULT = os.getenv("RATE_LIMIT_DEFAULT", "200 per day")
+    RATE_LIMIT_INSURE = os.getenv("RATE_LIMIT_INSURE", "50 per hour")
+    RATE_LIMIT_CLAIM = os.getenv("RATE_LIMIT_CLAIM", "10 per hour")
+    RATE_LIMIT_RENEW = os.getenv("RATE_LIMIT_RENEW", "5 per hour")
 
     # Payment verification
     PAYMENT_VERIFICATION_MODE = os.getenv(
@@ -64,6 +68,19 @@ class Config:
 
     # Security
     CORS_ORIGINS = os.getenv("CORS_ORIGINS", "*")  # Comma-separated
+    REQUIRE_CLAIM_AUTHENTICATION = os.getenv("REQUIRE_CLAIM_AUTHENTICATION", "false").lower() in ["1", "true", "yes"]
+
+    # Timeouts (in seconds)
+    ZKENGINE_TIMEOUT = int(os.getenv("ZKENGINE_TIMEOUT", 60))
+    BLOCKCHAIN_CONFIRMATION_TIMEOUT = int(os.getenv("BLOCKCHAIN_CONFIRMATION_TIMEOUT", 120))
+
+    # Chain configuration
+    CHAIN_ID = int(os.getenv("CHAIN_ID", 84532))  # Base Sepolia default
+
+    # Monitoring
+    SENTRY_DSN = os.getenv("SENTRY_DSN")  # Optional: Sentry error tracking
+    SENTRY_ENVIRONMENT = os.getenv("SENTRY_ENVIRONMENT", "development")
+    SENTRY_TRACES_SAMPLE_RATE = float(os.getenv("SENTRY_TRACES_SAMPLE_RATE", "0.1"))  # 10% of transactions
 
 
 class DevelopmentConfig(Config):
@@ -94,8 +111,18 @@ class ProductionConfig(Config):
     # Full payment verification in production
     PAYMENT_VERIFICATION_MODE = "full"
 
-    # Stricter CORS
+    # Stricter CORS - require explicit domain configuration
     CORS_ORIGINS = os.getenv("CORS_ORIGINS", "")
+
+    # Require authentication for claims in production
+    REQUIRE_CLAIM_AUTHENTICATION = os.getenv("REQUIRE_CLAIM_AUTHENTICATION", "true").lower() in ["1", "true", "yes"]
+
+    # Base Mainnet chain ID
+    CHAIN_ID = int(os.getenv("CHAIN_ID", 8453))  # Base Mainnet
+
+    # Monitoring (production)
+    SENTRY_ENVIRONMENT = os.getenv("SENTRY_ENVIRONMENT", "production")
+    SENTRY_TRACES_SAMPLE_RATE = float(os.getenv("SENTRY_TRACES_SAMPLE_RATE", "0.2"))  # 20% in production
 
 
 class TestingConfig(Config):

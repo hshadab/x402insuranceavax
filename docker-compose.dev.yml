@@ -1,0 +1,110 @@
+version: '3.8'
+
+# Development docker-compose configuration
+# Usage: docker-compose -f docker-compose.dev.yml up
+
+services:
+  # Development Flask application with hot-reload
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: x402-insurance-dev
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      # App Configuration (Development mode)
+      - ENV=development
+      - DEBUG=true
+      - PORT=8000
+      - HOST=0.0.0.0
+      - LOG_LEVEL=DEBUG
+
+      # Database (PostgreSQL for development)
+      - DATABASE_URL=postgresql://x402user:x402pass@postgres:5432/x402insurance_dev
+
+      # Blockchain (Base Sepolia testnet)
+      - BASE_RPC_URL=${BASE_RPC_URL:-https://sepolia.base.org}
+      - USDC_CONTRACT_ADDRESS=${USDC_CONTRACT_ADDRESS:-0x036CbD53842c5426634e7929541eC2318f3dCF7e}
+      - BACKEND_WALLET_PRIVATE_KEY=${BACKEND_WALLET_PRIVATE_KEY}
+      - BACKEND_WALLET_ADDRESS=${BACKEND_WALLET_ADDRESS}
+
+      # zkEngine
+      - ZKENGINE_BINARY_PATH=./zkengine/fraud_detector
+
+      # Payment verification (simple mode for dev)
+      - PAYMENT_VERIFICATION_MODE=simple
+
+      # Security (relaxed for dev)
+      - CORS_ORIGINS=*
+      - REQUIRE_CLAIM_AUTHENTICATION=false
+
+      # Chain configuration (Base Sepolia)
+      - CHAIN_ID=84532
+
+      # Rate limiting
+      - RATE_LIMIT_ENABLED=true
+      - RATE_LIMIT_STORAGE_URL=redis://redis:6379/0
+
+    volumes:
+      # Mount source code for hot-reload
+      - .:/app
+      - ./data:/app/data
+      - ./logs:/app/logs
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - x402-dev-network
+    command: python -u server.py
+
+  # PostgreSQL Database (Development)
+  postgres:
+    image: postgres:16-alpine
+    container_name: x402-postgres-dev
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=x402insurance_dev
+      - POSTGRES_USER=x402user
+      - POSTGRES_PASSWORD=x402pass
+    volumes:
+      - postgres-dev-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - x402-dev-network
+
+  # Redis for rate limiting
+  redis:
+    image: redis:7-alpine
+    container_name: x402-redis-dev
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - x402-dev-network
+
+  # pgAdmin for database management (always available in dev)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: x402-pgadmin-dev
+    restart: unless-stopped
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=dev@x402insurance.local
+      - PGADMIN_DEFAULT_PASSWORD=dev
+      - PGADMIN_CONFIG_SERVER_MODE=False
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin-dev-data:/var/lib/pgadmin
+    networks:
+      - x402-dev-network
+
+volumes:
+  postgres-dev-data:
+  pgadmin-dev-data:
+
+networks:
+  x402-dev-network:
+    driver: bridge

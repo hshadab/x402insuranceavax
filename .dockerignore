@@ -1,0 +1,76 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Environment files (NEVER include in Docker images)
+.env
+.env.*
+!.env.example
+
+# Data files (mount as volumes instead)
+data/*.json
+data/*.db
+data/*.sqlite
+
+# Test files
+.pytest_cache/
+.coverage
+htmlcov/
+*.cover
+test_results.txt
+test_*.txt
+
+# Logs
+*.log
+logs/
+
+# Documentation (not needed in runtime)
+docs/
+*.md
+!README.md
+
+# CI/CD
+.github/
+
+# Docker
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Backup files
+*.backup
+*.bak
+*.tmp
+
+# Render deployment files
+render.yaml
+.render-build-id
