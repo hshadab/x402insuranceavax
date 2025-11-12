@@ -92,9 +92,12 @@ services:
         - "*.md"
         - ".github/**"
 
-    # Docker build settings (use optimized production Dockerfile)
-    dockerfilePath: ./Dockerfile.prod
+    # Docker build settings (ultra-optimized for Render)
+    dockerfilePath: ./Dockerfile.render
     dockerContext: .
+
+    # Build command optimizations
+    dockerCommand: null  # Use CMD from Dockerfile
 
     # Disk for persistent data (policies, claims)
     disk:
