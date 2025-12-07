@@ -8,7 +8,7 @@ This guide covers deploying x402 Insurance using Docker and Docker Compose.
 
 ```bash
 # 1. Set environment variables
-export BASE_RPC_URL="your-rpc-url"
+export AVAX_RPC_URL="your-rpc-url"
 export BACKEND_WALLET_PRIVATE_KEY="your-private-key"
 export BACKEND_WALLET_ADDRESS="your-wallet-address"
 export SENTRY_DSN="your-sentry-dsn"  # Optional
@@ -54,12 +54,12 @@ Set these before running `docker-compose up`:
 
 ```bash
 # Required
-export BASE_RPC_URL="https://base-mainnet.g.alchemy.com/v2/YOUR_KEY"
+export AVAX_RPC_URL="https://avax-mainnet.g.alchemy.com/v2/YOUR_KEY"
 export BACKEND_WALLET_PRIVATE_KEY="0x..."
 export BACKEND_WALLET_ADDRESS="0x..."
 
 # Optional (have sensible defaults)
-export CHAIN_ID=8453
+export CHAIN_ID=43114
 export PREMIUM_PERCENTAGE=0.01
 export MAX_COVERAGE_USDC=0.1
 export CORS_ORIGINS="https://yourdomain.com"
@@ -72,10 +72,10 @@ Alternatively, create a `.env` file (NOT committed to git):
 
 ```bash
 # .env
-BASE_RPC_URL=https://base-mainnet.g.alchemy.com/v2/YOUR_KEY
+AVAX_RPC_URL=https://avax-mainnet.g.alchemy.com/v2/YOUR_KEY
 BACKEND_WALLET_PRIVATE_KEY=0x...
 BACKEND_WALLET_ADDRESS=0x...
-CHAIN_ID=8453
+CHAIN_ID=43114
 SENTRY_DSN=your-sentry-dsn
 ```
 
@@ -269,7 +269,7 @@ git clone https://github.com/yourusername/x402insurance.git
 cd x402insurance
 
 # 3. Set environment variables
-export BASE_RPC_URL="..."
+export AVAX_RPC_URL="..."
 export BACKEND_WALLET_PRIVATE_KEY="..."
 export BACKEND_WALLET_ADDRESS="..."
 

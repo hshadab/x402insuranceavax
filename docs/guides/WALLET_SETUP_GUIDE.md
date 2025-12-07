@@ -1,4 +1,4 @@
-# Wallet Setup Guide - Base Sepolia
+# Wallet Setup Guide - Avalanche Fuji
 
 Complete guide to setting up a fresh MetaMask wallet for the x402 Insurance Service.
 
@@ -7,7 +7,7 @@ Complete guide to setting up a fresh MetaMask wallet for the x402 Insurance Serv
 ## Quick Start (5 Steps)
 
 1. **Create new MetaMask account** (see below)
-2. **Add Base Sepolia network** (see below)
+2. **Add Avalanche Fuji network** (see below)
 3. **Get test ETH** from faucet
 4. **Run setup script:** `python setup_wallet.py`
 5. **Restart server**
@@ -23,7 +23,7 @@ Best for keeping everything in one place:
 1. Open MetaMask extension
 2. Click account icon (top right, circle with colors)
 3. Click **"Add account"** or **"Create account"**
-4. Name it: `Base Insurance Backend`
+4. Name it: `Avalanche Insurance Backend`
 5. Click **"Create"**
 6. ✅ Done! You have a fresh address with no history
 
@@ -54,7 +54,7 @@ Keep both wallets accessible:
 1. Click profile icon (top right)
 2. Click **"Add"**
 3. Click **"Continue without an account"**
-4. Name it: `Base Dev`
+4. Name it: `Avalanche Dev`
 5. Install MetaMask in new profile
 6. Create new wallet
 
@@ -68,12 +68,12 @@ Keep both wallets accessible:
 
 ---
 
-## Step 2: Add Base Sepolia Network
+## Step 2: Add Avalanche Fuji Network
 
 ### Automatic Method (Easiest)
 
 1. Go to https://chainlist.org
-2. Search: `Base Sepolia`
+2. Search: `Avalanche Fuji`
 3. Click **"Add to MetaMask"**
 4. Approve in MetaMask
 5. ✅ Done!
@@ -87,15 +87,15 @@ Keep both wallets accessible:
 5. Enter these **exact** values:
 
 ```
-Network Name:      Base Sepolia
-RPC URL:          https://sepolia.base.org
-Chain ID:         84532
+Network Name:      Avalanche Fuji
+RPC URL:          https://api.avax-test.network/ext/bc/C/rpc
+Chain ID:         431142
 Currency Symbol:  ETH
-Block Explorer:   https://sepolia.basescan.org
+Block Explorer:   https://sepolia.snowtrace.io
 ```
 
 6. Click **"Save"**
-7. Switch to Base Sepolia network
+7. Switch to Avalanche Fuji network
 8. ✅ Done!
 
 ---
@@ -136,7 +136,7 @@ Should look like: `0x1234567890abcdef...` (64 hex characters after 0x)
 
 1. Go to https://portal.cdp.coinbase.com/products/faucet
 2. Sign in with Coinbase account (or create free account)
-3. Select **"Base Sepolia"** network
+3. Select **"Avalanche Fuji"** network
 4. Paste your wallet address
 5. Click **"Request"**
 6. Wait ~30 seconds
@@ -144,7 +144,7 @@ Should look like: `0x1234567890abcdef...` (64 hex characters after 0x)
 
 **Option 2 - Alchemy Faucet:**
 
-1. Go to https://www.alchemy.com/faucets/base-sepolia
+1. Go to https://www.alchemy.com/faucets/avalanche-fuji
 2. Sign up/sign in (free)
 3. Enter your wallet address
 4. Complete captcha
@@ -161,13 +161,13 @@ Should look like: `0x1234567890abcdef...` (64 hex characters after 0x)
 
 The insurance service will send USDC refunds. To test receiving:
 
-1. Go to Base Sepolia DEX or faucet
+1. Go to Avalanche Fuji DEX or faucet
 2. Swap some test ETH for test USDC
 3. Or use USDC faucet if available
 
-**USDC Contract on Base Sepolia:**
+**USDC Contract on Avalanche Fuji:**
 ```
-0x036CbD53842c5426634e7929541eC2318f3dCF7e
+0x5425890298aed601595a70AB815c96711a31Bc65
 ```
 
 ---
@@ -187,7 +187,7 @@ The script will:
 2. ✅ Securely ask for private key (hidden input)
 3. ✅ Validate both credentials
 4. ✅ Update .env file
-5. ✅ Test connection to Base Sepolia
+5. ✅ Test connection to Avalanche Fuji
 6. ✅ Show your balance
 
 ### Example Session:
@@ -197,7 +197,7 @@ The script will:
 x402 Insurance Service - Wallet Setup
 ======================================================================
 
-This script will securely configure your Base Sepolia wallet.
+This script will securely configure your Avalanche Fuji wallet.
 
 ⚠️  SECURITY WARNINGS:
    • NEVER share your private key with anyone
@@ -206,7 +206,7 @@ This script will securely configure your Base Sepolia wallet.
 
 Step 1: Wallet Address
 ----------------------------------------------------------------------
-Enter your Base Sepolia wallet address (0x...): 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb
+Enter your Avalanche Fuji wallet address (0x...): 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb
 ✅ Valid address: 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb
 
 Step 2: Private Key
@@ -230,7 +230,7 @@ Step 5: Testing Connection
 ----------------------------------------------------------------------
 ✅ Wallet connected successfully!
    Address: 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb
-   Balance: 0.1 ETH on Base Sepolia
+   Balance: 0.1 ETH on Avalanche Fuji
 
 ======================================================================
 ✅ Wallet setup complete!
@@ -307,8 +307,8 @@ import os
 load_dotenv()
 
 client = BlockchainClient(
-    rpc_url='https://sepolia.base.org',
-    usdc_address='0x036CbD53842c5426634e7929541eC2318f3dCF7e',
+    rpc_url='https://api.avax-test.network/ext/bc/C/rpc',
+    usdc_address='0x5425890298aed601595a70AB815c96711a31Bc65',
     private_key=os.getenv('BACKEND_WALLET_PRIVATE_KEY')
 )
 
@@ -325,7 +325,7 @@ Before going live, verify:
 - [ ] Using a fresh wallet address (no old transaction history)
 - [ ] Private key is stored only in .env
 - [ ] .env is in .gitignore
-- [ ] Only using testnet (Base Sepolia)
+- [ ] Only using testnet (Avalanche Fuji)
 - [ ] Have test ETH for gas
 - [ ] Server shows "Blockchain initialized with wallet"
 - [ ] Never shared private key with anyone
@@ -352,11 +352,11 @@ Before going live, verify:
 
 ### "Cannot connect to RPC"
 
-**Problem:** Base Sepolia RPC is down
+**Problem:** Avalanche Fuji RPC is down
 
 **Solution:**
-- Try alternative RPC: `https://base-sepolia-rpc.publicnode.com`
-- Update in .env: `BASE_RPC_URL=https://base-sepolia-rpc.publicnode.com`
+- Try alternative RPC: `https://api.avax-test.network/ext/bc/C/rpc`
+- Update in .env: `AVAX_RPC_URL=https://api.avax-test.network/ext/bc/C/rpc`
 
 ### "Address/key mismatch"
 
@@ -379,7 +379,7 @@ After wallet setup is complete:
 Your insurance service is now **fully functional** with:
 - Real x402 payment verification
 - Real zero-knowledge proofs
-- Real USDC refunds on Base Sepolia
+- Real USDC refunds on Avalanche Fuji
 
 Ready to deploy! 🚀
 
@@ -413,7 +413,7 @@ If you need help:
 
 1. Check server logs for errors
 2. Verify wallet has test ETH
-3. Confirm Base Sepolia network is added
+3. Confirm Avalanche Fuji network is added
 4. Make sure .env has correct address and key
 5. Try alternative RPC if connection fails
 

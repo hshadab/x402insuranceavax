@@ -77,7 +77,7 @@ refund_tx_hash = blockchain.issue_refund(
 )
 ```
 
-**Result:** Standard USDC ERC20 transfer on Base Mainnet
+**Result:** Standard USDC ERC20 transfer on Avalanche C-Chain
 
 ### 6. Publish Proof (On-Chain)
 

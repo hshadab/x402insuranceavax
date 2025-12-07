@@ -1,5 +1,5 @@
 """
-Blockchain service - USDC refunds on Base
+Blockchain service - USDC refunds on Avalanche
 
 Enhanced with:
 - Retry logic for failed transactions

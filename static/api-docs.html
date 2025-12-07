@@ -436,7 +436,7 @@
                 <p><strong>Key Features:</strong></p>
                 <ul>
                     <li><strong>Zero-Knowledge Proofs:</strong> Claims are verified using NovaNet without revealing private merchant data</li>
-                    <li><strong>Instant Payouts:</strong> Valid claims trigger automatic USDC refunds on Base Mainnet</li>
+                    <li><strong>Instant Payouts:</strong> Valid claims trigger automatic USDC refunds on Avalanche C-Chain</li>
                     <li><strong>Publicly Verifiable:</strong> Anyone can independently verify claim proofs via public endpoint</li>
                     <li><strong>x402 Compliant:</strong> Integrated with the x402 micropayment protocol</li>
                 </ul>
@@ -444,8 +444,8 @@
                 <p><strong>Base URL:</strong></p>
                 <div class="code-block">https://your-domain.example.com</div>
 
-                <p><strong>Network:</strong> Base Mainnet (Chain ID: 8453)</p>
-                <p><strong>Payment Token:</strong> USDC (0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913)</p>
+                <p><strong>Network:</strong> Avalanche C-Chain (Chain ID: 43114)</p>
+                <p><strong>Payment Token:</strong> USDC (0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E)</p>
             </div>
         </div>
 
@@ -498,7 +498,7 @@
                 </ul>
 
                 <div class="info-box warning">
-                    <strong>⚠️ Payment Required:</strong> Premium payments are verified on-chain. Ensure your agent has sufficient USDC balance and gas fees (ETH) on Base Mainnet before purchasing policies.
+                    <strong>⚠️ Payment Required:</strong> Premium payments are verified on-chain. Ensure your agent has sufficient USDC balance and gas fees (ETH) on Avalanche C-Chain before purchasing policies.
                 </div>
             </div>
         </div>
@@ -620,7 +620,7 @@
   "proof_generation_time_ms": 15234,
   "verification_result": true,
   "payout_amount": 0.01,
-  "refund_tx_hash": "0x789abc...",  <span class="comment">// Base Mainnet tx</span>
+  "refund_tx_hash": "0x789abc...",  <span class="comment">// Avalanche C-Chain tx</span>
   "status": "paid"
 }</div>
 
@@ -922,7 +922,7 @@
   "recent_policies": [...],
   "recent_claims": [...],
   "blockchain": {
-    "chain_id": 8453,
+    "chain_id": 43114,
     "block_number": 12345678,
     "wallet_address": "0xba72eD...",
     "eth_balance": "0.05",
@@ -988,7 +988,7 @@ Response: {
   refund_tx_hash: "0x789...",
   payout_amount: 0.01
 }</div>
-                        <p>zkEngine proves failure in zero-knowledge, triggers instant USDC refund on Base.</p>
+                        <p>zkEngine proves failure in zero-knowledge, triggers instant USDC refund on Avalanche.</p>
                     </li>
                 </ol>
 
@@ -1020,7 +1020,7 @@ premium = coverage_amount * 0.01  <span class="comment"># 1% = $0.0001 USDC</spa
 payment_proof = create_payment_proof(
     amount=premium,
     recipient="0xba72eD392dB9d67813D68D562D2d67c36fFF566b",
-    network="base"
+    network="avalanche"
 )
 
 response = requests.post(
@@ -1071,7 +1071,7 @@ const premium = coverageAmount * 0.01; <span class="comment">// 1%</span>
 const paymentProof = await createPaymentProof({
   amount: premium,
   recipient: '0xba72eD392dB9d67813D68D562D2d67c36fFF566b',
-  network: 'base'
+  network: 'avalanche'
 });
 
 const policyResponse = await fetch('https://insurance.x402.com/insure', {
@@ -1207,8 +1207,8 @@ if (merchantResponse.status >= 500) {
                     </tr>
                     <tr>
                         <td><code>BLOCKCHAIN_ERROR</code></td>
-                        <td>Base network issues</td>
-                        <td>Wait and retry, check Basescan</td>
+                        <td>Avalanche network issues</td>
+                        <td>Wait and retry, check Snowtrace</td>
                     </tr>
                 </table>
 
@@ -1231,7 +1231,7 @@ if (merchantResponse.status >= 500) {
                 <ul>
                     <li>No hard rate limits currently enforced</li>
                     <li>Proof generation is rate-limited by zkEngine (1 concurrent proof per instance)</li>
-                    <li>Blockchain transactions limited by Base network capacity</li>
+                    <li>Blockchain transactions limited by Avalanche network capacity</li>
                 </ul>
 
                 <p><strong>Best Practices:</strong></p>
@@ -1240,7 +1240,7 @@ if (merchantResponse.status >= 500) {
                     <li>✅ Cache policy_id for reuse within 24-hour window</li>
                     <li>✅ Implement retry logic with exponential backoff</li>
                     <li>✅ Verify proofs independently using <code>POST /verify</code></li>
-                    <li>✅ Monitor refund transactions on Basescan</li>
+                    <li>✅ Monitor refund transactions on Snowtrace</li>
                     <li>❌ Don't spam claims - only submit for genuine service failures</li>
                     <li>❌ Don't purchase policies with coverage > $0.1 USDC (current limit)</li>
                 </ul>
@@ -1265,16 +1265,16 @@ if (merchantResponse.status >= 500) {
                 <p><strong>Need Help?</strong></p>
                 <ul>
                     <li>📖 <a href="https://github.com/hshadab/x402insurance" target="_blank" style="color: var(--accent-primary);">GitHub Repository</a> - Source code and issues</li>
-                    <li>🌐 <a href="https://basescan.org/address/0xba72eD392dB9d67813D68D562D2d67c36fFF566b" target="_blank" style="color: var(--accent-primary);">Basescan</a> - Verify on-chain transactions</li>
+                    <li>🌐 <a href="https://snowtrace.io/address/0xba72eD392dB9d67813D68D562D2d67c36fFF566b" target="_blank" style="color: var(--accent-primary);">Snowtrace</a> - Verify on-chain transactions</li>
                     <li>🔗 <a href="https://docs.x402.org" target="_blank" style="color: var(--accent-primary);">x402 Protocol Docs</a> - Learn about x402 payments</li>
                     <li>🧪 <a href="https://docs.arecibo.dev" target="_blank" style="color: var(--accent-primary);">Arecibo/Nova Docs</a> - Zero-knowledge proof system</li>
                 </ul>
 
-                <p><strong>Contract Addresses (Base Mainnet):</strong></p>
+                <p><strong>Contract Addresses (Avalanche C-Chain):</strong></p>
                 <div class="code-block">Insurance Backend: 0xba72eD392dB9d67813D68D562D2d67c36fFF566b
-USDC Token:        0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913
-Network:           Base (Chain ID 8453)
-RPC:               https://mainnet.base.org</div>
+USDC Token:        0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E
+Network:           Avalanche (Chain ID 43114)
+RPC:               https://api.avax.network/ext/bc/C/rpc</div>
             </div>
         </div>
 

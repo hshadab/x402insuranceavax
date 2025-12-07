@@ -56,7 +56,7 @@ Story-based view showing what happened during claim processing.
 
 **Transaction Info:**
 - Full transaction hash
-- Link to Basescan
+- Link to Snowtrace
 - Proof verification details
 
 ---
@@ -209,7 +209,7 @@ const processingTime = (paidAt - createdAt) / 1000;
 │  🔗 Transaction Hash                                    │
 │  0xabc123def456...                                      │
 ├─────────────────────────────────────────────────────────┤
-│  [🔐 View Proof Details]  [🔗 View on Basescan]        │
+│  [🔐 View Proof Details]  [🔗 View on Snowtrace]        │
 └─────────────────────────────────────────────────────────┘
 ```
 

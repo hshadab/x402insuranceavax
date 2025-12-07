@@ -14,17 +14,17 @@ Use this checklist to ensure a smooth deployment to Render.
 - [ ] **Verify wallet has funds**
   - [ ] ETH for gas: ~0.005 ETH minimum
   - [ ] USDC for refunds: Based on expected coverage
-  - [ ] Check balance at https://basescan.org
+  - [ ] Check balance at https://snowtrace.io
 
 - [ ] **Get Alchemy API Key**
   - [ ] Sign up at https://alchemy.com
-  - [ ] Create Base Mainnet app
-  - [ ] Copy API key for BASE_RPC_URL
+  - [ ] Create Avalanche C-Chain app
+  - [ ] Copy API key for AVAX_RPC_URL
 
 - [ ] **Prepare environment variables**
   - [ ] BACKEND_WALLET_PRIVATE_KEY (from wallet)
   - [ ] BACKEND_WALLET_ADDRESS (from wallet)
-  - [ ] BASE_RPC_URL (from Alchemy)
+  - [ ] AVAX_RPC_URL (from Alchemy)
 
 ## Git Repository Setup
 
@@ -72,7 +72,7 @@ Use this checklist to ensure a smooth deployment to Render.
   - Add these as **secret** environment variables:
     - `BACKEND_WALLET_PRIVATE_KEY` = (your private key)
     - `BACKEND_WALLET_ADDRESS` = (your wallet address)
-    - `BASE_RPC_URL` = https://base-mainnet.g.alchemy.com/v2/YOUR_KEY
+    - `AVAX_RPC_URL` = https://avax-mainnet.g.alchemy.com/v2/YOUR_KEY
 
 - [ ] **Review render.yaml settings**
   - Region: Choose closest to your users
@@ -116,7 +116,7 @@ Use this checklist to ensure a smooth deployment to Render.
   ```
 
 - [ ] **Verify refund on blockchain**
-  - Check transaction on https://basescan.org
+  - Check transaction on https://snowtrace.io
   - Confirm USDC transfer occurred
 
 - [ ] **Monitor wallet balance**
@@ -188,13 +188,13 @@ If deployment fails, check:
 4. **Refunds fail**
    - Verify wallet has ETH for gas
    - Verify wallet has USDC for refunds
-   - Check Base Mainnet RPC is working
+   - Check Avalanche C-Chain RPC is working
 
 ## Support Resources
 
 - **Render Docs:** https://render.com/docs
 - **Render Community:** https://community.render.com
-- **Base Docs:** https://docs.base.org
+- **Avalanche Docs:** https://docs.avax.network
 - **x402 Docs:** https://github.com/coinbase/x402
 
 ---

@@ -67,9 +67,9 @@ Check progress: https://github.com/hshadab/x402insurance/actions
 ENV=production
 FLASK_ENV=production
 PORT=8000
-BASE_RPC_URL=https://mainnet.base.org
-USDC_CONTRACT_ADDRESS=0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913
-CHAIN_ID=8453
+AVAX_RPC_URL=https://api.avax.network/ext/bc/C/rpc
+USDC_CONTRACT_ADDRESS=0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E
+CHAIN_ID=43114
 ZKENGINE_BINARY_PATH=./zkengine/fraud_detector
 PREMIUM_PERCENTAGE=0.01
 MAX_COVERAGE_USDC=0.1

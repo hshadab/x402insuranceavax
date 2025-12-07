@@ -23,12 +23,12 @@ services:
         value: production
       - key: FLASK_ENV
         value: production
-      - key: BASE_RPC_URL
-        value: https://mainnet.base.org
+      - key: AVAX_RPC_URL
+        value: https://api.avax.network/ext/bc/C/rpc
       - key: USDC_CONTRACT_ADDRESS
-        value: 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913
+        value: 0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E
       - key: CHAIN_ID
-        value: 8453
+        value: 43114
       - key: ZKENGINE_BINARY_PATH
         value: ./zkengine/fraud_detector
       - key: PREMIUM_PERCENTAGE

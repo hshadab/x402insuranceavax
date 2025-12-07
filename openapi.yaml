@@ -145,8 +145,8 @@ paths:
 
         **x402 Payment Required:**
         - Premium: percentage-based (1% of requested coverage)
-        - Asset: USDC on Base Mainnet
-        - Network: base
+        - Asset: USDC on Avalanche C-Chain
+        - Network: avalanche
 
         **Payment Flow:**
         1. POST without payment → 402 response with payment details
@@ -352,8 +352,8 @@ paths:
 
         **x402 Payment Required:**
         - Amount: Pro-rated renewal fee
-        - Asset: USDC on Base Mainnet
-        - Network: base
+        - Asset: USDC on Avalanche C-Chain
+        - Network: avalanche
 
         **Payment Flow:**
         1. POST without payment → 402 response with renewal fee
@@ -511,7 +511,7 @@ components:
               example: "USDC"
             network:
               type: string
-              example: "base"
+              example: "avalanche"
         coverage:
           type: object
           properties:
@@ -541,7 +541,7 @@ components:
               example: "x402"
             network:
               type: string
-              example: "base"
+              example: "avalanche"
             token:
               type: object
               properties:
@@ -550,7 +550,7 @@ components:
                   example: "USDC"
                 address:
                   type: string
-                  example: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+                  example: "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E"
                 decimals:
                   type: integer
                   example: 6
@@ -957,7 +957,7 @@ components:
               properties:
                 address:
                   type: string
-                  example: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+                  example: "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E"
                 decimals:
                   type: integer
                   example: 6
@@ -969,7 +969,7 @@ components:
               description: Backend wallet address
             network:
               type: string
-              example: "base"
+              example: "avalanche"
 
     Error:
       type: object

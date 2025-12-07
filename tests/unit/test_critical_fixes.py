@@ -181,7 +181,7 @@ class TestNoncePersistence:
             # Create verifier with custom nonce storage
             verifier = PaymentVerifier(
                 backend_address="0x1234567890123456789012345678901234567890",
-                usdc_address="0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                usdc_address="0x5425890298aed601595a70AB815c96711a31Bc65",  # Avalanche Fuji USDC
                 nonce_storage_path=nonce_file
             )
 
@@ -206,7 +206,7 @@ class TestNoncePersistence:
             # First instance - mark nonce as used
             verifier1 = PaymentVerifier(
                 backend_address="0x1234567890123456789012345678901234567890",
-                usdc_address="0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                usdc_address="0x5425890298aed601595a70AB815c96711a31Bc65",  # Avalanche Fuji USDC
                 nonce_storage_path=nonce_file
             )
             verifier1._mark_nonce_used("0xpayer1", "nonce456", int(time.time()))
@@ -217,7 +217,7 @@ class TestNoncePersistence:
             # Simulate restart - create new instance
             verifier2 = PaymentVerifier(
                 backend_address="0x1234567890123456789012345678901234567890",
-                usdc_address="0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                usdc_address="0x5425890298aed601595a70AB815c96711a31Bc65",  # Avalanche Fuji USDC
                 nonce_storage_path=nonce_file
             )
 
@@ -248,7 +248,7 @@ class TestNoncePersistence:
             # Load verifier - should clean old nonces
             verifier = PaymentVerifier(
                 backend_address="0x1234567890123456789012345678901234567890",
-                usdc_address="0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                usdc_address="0x5425890298aed601595a70AB815c96711a31Bc65",  # Avalanche Fuji USDC
                 nonce_storage_path=nonce_file
             )
 

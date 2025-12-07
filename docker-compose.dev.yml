@@ -24,9 +24,9 @@ services:
       # Database (PostgreSQL for development)
       - DATABASE_URL=postgresql://x402user:x402pass@postgres:5432/x402insurance_dev
 
-      # Blockchain (Base Sepolia testnet)
-      - BASE_RPC_URL=${BASE_RPC_URL:-https://sepolia.base.org}
-      - USDC_CONTRACT_ADDRESS=${USDC_CONTRACT_ADDRESS:-0x036CbD53842c5426634e7929541eC2318f3dCF7e}
+      # Blockchain (Avalanche Fuji testnet)
+      - AVAX_RPC_URL=${AVAX_RPC_URL:-https://api.avax-test.network/ext/bc/C/rpc}
+      - USDC_CONTRACT_ADDRESS=${USDC_CONTRACT_ADDRESS:-0x5425890298aed601595a70AB815c96711a31Bc65}
       - BACKEND_WALLET_PRIVATE_KEY=${BACKEND_WALLET_PRIVATE_KEY}
       - BACKEND_WALLET_ADDRESS=${BACKEND_WALLET_ADDRESS}
 
@@ -40,8 +40,8 @@ services:
       - CORS_ORIGINS=*
       - REQUIRE_CLAIM_AUTHENTICATION=false
 
-      # Chain configuration (Base Sepolia)
-      - CHAIN_ID=84532
+      # Chain configuration (Avalanche Fuji)
+      - CHAIN_ID=43113
 
       # Rate limiting
       - RATE_LIMIT_ENABLED=true

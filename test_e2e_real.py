@@ -34,9 +34,9 @@ else:
 
 # Configuration
 BASE_URL = os.getenv("TEST_BASE_URL", "http://localhost:8000")
-RPC_URL = os.getenv("BASE_RPC_URL", "https://mainnet.base.org")
+RPC_URL = os.getenv("AVAX_RPC_URL", "https://api.avax.network/ext/bc/C/rpc")
 WALLET_ADDRESS = os.getenv("BACKEND_WALLET_ADDRESS")
-USDC_ADDRESS = os.getenv("USDC_CONTRACT_ADDRESS", "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913")
+USDC_ADDRESS = os.getenv("USDC_CONTRACT_ADDRESS", "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E")
 
 # Test parameters
 COVERAGE_AMOUNT = 0.01  # 0.01 USDC coverage
@@ -248,7 +248,7 @@ def verify_proof(claim_id):
 
 def verify_transaction(tx_hash):
     """Verify the refund transaction on-chain"""
-    print_info(f"Verifying transaction on Base Mainnet...")
+    print_info(f"Verifying transaction on Avalanche C-Chain...")
 
     try:
         w3 = Web3(Web3.HTTPProvider(RPC_URL))
@@ -269,7 +269,7 @@ def verify_transaction(tx_hash):
             print_info(f"Block: {tx_receipt['blockNumber']}")
             print_info(f"Gas used: {tx_receipt['gasUsed']}")
             print_info(f"Status: {'Success' if tx_receipt['status'] == 1 else 'Failed'}")
-            print_info(f"View on Basescan: https://basescan.org/tx/{tx_hash}")
+            print_info(f"View on Snowtrace: https://snowtrace.io/tx/{tx_hash}")
             return tx_receipt
         else:
             print_error("Transaction not found on-chain")

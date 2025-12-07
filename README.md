@@ -1,9 +1,9 @@
-# x402 Insurance
+# x402 Insurance (Avalanche)
 
 **Zero-Knowledge Proof Verified Insurance for x402 API Failures**
 
 Protect your AI agents from API downtime, timeouts, and service interruptions with instant,
-cryptographically-verified refunds on Base Mainnet.
+cryptographically-verified refunds on Avalanche C-Chain.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![x402 Protocol](https://img.shields.io/badge/x402-Compatible-blue)](https://github.com/coinbase/x402)
@@ -65,12 +65,12 @@ Pay a 1% premium → Get coverage (up to $0.1 USDC per claim) → If API fails, 
 6. Proof verified → We pay agent X USDC FROM OUR RESERVES
    → Service keeps their payment, we absorb the loss
    → Example: Agent receives 0.01 USDC refund (100% of coverage)
-   → Refund TX on Base: Standard USDC ERC20 transfer
+   → Refund TX on Avalanche: Standard USDC ERC20 transfer
                     ↓
-7. Public proof published on-chain (Base Mainnet)
+7. Public proof published on-chain (Avalanche C-Chain)
    → Proof data stored in transaction input field
    → Contains: claim_id, proof_hash, public_inputs, payout_amount, recipient
-   → Anyone can verify we paid a legitimate claim by checking Basescan
+   → Anyone can verify we paid a legitimate claim by checking Snowtrace
 ```
 
 **Pricing Model:**
@@ -165,7 +165,7 @@ Pay a 1% premium → Get coverage (up to $0.1 USDC per claim) → If API fails, 
 
 ### On-Chain Transactions
 
-Every insurance flow involves **three on-chain transactions** on Base Mainnet:
+Every insurance flow involves **three on-chain transactions** on Avalanche C-Chain:
 
 1. **Premium Payment (Agent → Insurance Service)**
    - Type: x402 agent-to-agent payment
@@ -177,7 +177,7 @@ Every insurance flow involves **three on-chain transactions** on Base Mainnet:
    - Type: Standard USDC ERC20 transfer
    - Insurance pays full coverage amount to agent
    - Triggered after zkEngine proof verification
-   - Viewable on Basescan as regular USDC transfer
+   - Viewable on Snowtrace as regular USDC transfer
 
 3. **Proof Publication (Insurance Service → Self)**
    - Type: Zero-value transaction with proof data
@@ -188,7 +188,7 @@ Every insurance flow involves **three on-chain transactions** on Base Mainnet:
 **Example Claim:**
 - Refund TX: `0x29c71c423d09ca6101456e458b68022008b541ef78fa9cc76b399e45a3497a62`
 - Proof TX: `0x[proof_publication_tx]`
-- View on Basescan: https://basescan.org/address/0xA7c563342543fBa03707EEa79fb5Aaad80228bC5
+- View on Snowtrace: https://snowtrace.io/address/0xA7c563342543fBa03707EEa79fb5Aaad80228bC5
 
 ## Quick Start
 
@@ -197,9 +197,9 @@ Every insurance flow involves **three on-chain transactions** on Base Mainnet:
 python -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 
-# 2. Configure environment (Base Sepolia recommended for dev)
+# 2. Configure environment (Avalanche Fuji recommended for dev)
 # Copy .env.example to .env and set values:
-#   BASE_RPC_URL=...           # use testnet for development
+#   AVAX_RPC_URL=...           # use testnet for development
 #   USDC_CONTRACT_ADDRESS=...
 #   BACKEND_WALLET_PRIVATE_KEY=... (dev only)
 #   BACKEND_WALLET_ADDRESS=...
@@ -319,9 +319,9 @@ Response (without payment):
 {
   "x402Version": 1,
   "accepts": [{
-    "network": "base",
+    "network": "avalanche",
     "maxAmountRequired": "1000000000",
-    "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+    "asset": "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E",
     "payTo": "0xba72eD392dB9d67813D68D562D2d67c36fFF566b",
     ...
   }],
@@ -460,7 +460,7 @@ curl -X POST http://localhost:8000/claim \
 ### Guides
 - **[Deployment Guide](docs/guides/DEPLOYMENT.md)** - Deploy to production
 - **[Production Setup](docs/guides/PRODUCTION_SETUP.md)** - Configuration guide
-- **[Wallet Setup](docs/guides/WALLET_SETUP_GUIDE.md)** - Base Mainnet wallet setup
+- **[Wallet Setup](docs/guides/WALLET_SETUP_GUIDE.md)** - Avalanche wallet setup
 
 ### Development
 - **[Agent Integration](docs/development/AGENT_DISCOVERY.md)** - x402 Bazaar integration
@@ -486,7 +486,7 @@ curl -X POST http://localhost:8000/claim \
    ▼       ▼
 ┌────┐  ┌──────────┐
 │zkEng│ │Blockchain│
-│Nova │ │Base USDC │
+│Nova │ │Avax USDC │
 └────┘  └──────────┘
 ```
 
@@ -494,8 +494,8 @@ curl -X POST http://localhost:8000/claim \
 
 - **x402 Protocol** - Decentralized HTTP payments (Coinbase)
 - **zkEngine** - Nova/Spartan zero-knowledge proof system
-- **Base Mainnet** - Ethereum L2 for USDC refunds
-- **Alchemy** - Reliable RPC provider
+- **Avalanche C-Chain** - EVM-compatible chain for USDC refunds
+- **Avalanche RPC** - Reliable RPC provider
 - **Flask** - Minimal Python web framework
 
 ## Deployment
@@ -524,7 +524,7 @@ Ready to deploy to Render.com:
 
 ⚠️ **CRITICAL**: Never commit secrets (.env) to git. Use environment variables in deployment.
 ⚠️ **IMPORTANT**: If .env was previously committed, remove from git history (see SECURITY_IMPROVEMENTS.md)
-🧪 Use Base Sepolia for development; switch to Mainnet only with proper key management
+🧪 Use Avalanche Fuji for development; switch to Mainnet only with proper key management
 🔐 Enable claim authentication in production (`REQUIRE_CLAIM_AUTHENTICATION=true`)
 🌐 Restrict CORS to your domain (`CORS_ORIGINS=https://yourdomain.com`)
 ✅ Zero-knowledge proofs (mock/real) to protect merchant privacy
@@ -603,8 +603,8 @@ Kyle Den Hartog (Brave Security) identified a critical gap:
 ## Support
 
 **Wallet:** 0xa4d01549F1460142FAF735e6B18600949C5764a9
-**Network:** Base Mainnet (Chain ID: 8453)
-**Block Explorer:** https://basescan.org
+**Network:** Avalanche C-Chain (Chain ID: 43114)
+**Block Explorer:** https://snowtrace.io
 
 **Documentation:**
 - Full positioning: See `POSITIONING.md` for market analysis

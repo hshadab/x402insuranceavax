@@ -11,8 +11,8 @@ class TestBlockchainClient:
     def setup_method(self):
         # Initialize without private key (mock mode)
         self.client = BlockchainClient(
-            rpc_url="https://sepolia.base.org",
-            usdc_address="0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+            rpc_url="https://api.avax-test.network/ext/bc/C/rpc",  # Avalanche Fuji
+            usdc_address="0x5425890298aed601595a70AB815c96711a31Bc65",  # Avalanche Fuji USDC
             private_key=None
         )
 

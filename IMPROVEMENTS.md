@@ -168,7 +168,7 @@ python server.py
     },
     "blockchain": {
       "status": "connected",
-      "chain_id": 8453,
+      "chain_id": 43114,
       "latest_block": 12345678,
       "gas_price_gwei": 0.05
     },
@@ -271,7 +271,7 @@ git clone https://github.com/yourusername/x402insurance.git
 cd x402insurance
 
 # 2. Set environment variables
-export BASE_RPC_URL="your-rpc-url"
+export AVAX_RPC_URL="your-rpc-url"
 export BACKEND_WALLET_PRIVATE_KEY="your-key"
 export BACKEND_WALLET_ADDRESS="your-address"
 export SENTRY_DSN="your-sentry-dsn"

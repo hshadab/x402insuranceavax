@@ -28,10 +28,10 @@ class Config:
     DATA_DIR = Path(os.getenv("DATA_DIR", "data"))
 
     # Blockchain
-    BASE_RPC_URL = os.getenv("BASE_RPC_URL", "https://sepolia.base.org")
+    AVAX_RPC_URL = os.getenv("AVAX_RPC_URL", "https://api.avax-test.network/ext/bc/C/rpc")
     USDC_CONTRACT_ADDRESS = os.getenv(
         "USDC_CONTRACT_ADDRESS",
-        "0x036CbD53842c5426634e7929541eC2318f3dCF7e"  # Base Sepolia USDC
+        "0x5425890298aed601595a70AB815c96711a31Bc65"  # Avalanche Fuji USDC
     )
     BACKEND_WALLET_PRIVATE_KEY = os.getenv("BACKEND_WALLET_PRIVATE_KEY")
     BACKEND_WALLET_ADDRESS = os.getenv("BACKEND_WALLET_ADDRESS")
@@ -75,7 +75,7 @@ class Config:
     BLOCKCHAIN_CONFIRMATION_TIMEOUT = int(os.getenv("BLOCKCHAIN_CONFIRMATION_TIMEOUT", 120))
 
     # Chain configuration
-    CHAIN_ID = int(os.getenv("CHAIN_ID", 84532))  # Base Sepolia default
+    CHAIN_ID = int(os.getenv("CHAIN_ID", 43113))  # Avalanche Fuji default
 
     # Monitoring
     SENTRY_DSN = os.getenv("SENTRY_DSN")  # Optional: Sentry error tracking
@@ -90,7 +90,7 @@ class DevelopmentConfig(Config):
     LOG_LEVEL = "DEBUG"
 
     # Use testnet by default
-    BASE_RPC_URL = os.getenv("BASE_RPC_URL", "https://sepolia.base.org")
+    AVAX_RPC_URL = os.getenv("AVAX_RPC_URL", "https://api.avax-test.network/ext/bc/C/rpc")
 
     # Simple payment verification for easier testing
     PAYMENT_VERIFICATION_MODE = "simple"
@@ -103,7 +103,7 @@ class ProductionConfig(Config):
     LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
 
     # Require mainnet configuration
-    BASE_RPC_URL = os.getenv("BASE_RPC_URL")
+    AVAX_RPC_URL = os.getenv("AVAX_RPC_URL")
 
     # Require wallet configuration (validated at runtime, not import time)
     # Validation happens in get_config() or when config is used
@@ -117,8 +117,8 @@ class ProductionConfig(Config):
     # Require authentication for claims in production
     REQUIRE_CLAIM_AUTHENTICATION = os.getenv("REQUIRE_CLAIM_AUTHENTICATION", "true").lower() in ["1", "true", "yes"]
 
-    # Base Mainnet chain ID
-    CHAIN_ID = int(os.getenv("CHAIN_ID", 8453))  # Base Mainnet
+    # Avalanche Mainnet chain ID
+    CHAIN_ID = int(os.getenv("CHAIN_ID", 43114))  # Avalanche Mainnet
 
     # Monitoring (production)
     SENTRY_ENVIRONMENT = os.getenv("SENTRY_ENVIRONMENT", "production")
@@ -155,8 +155,8 @@ def get_config(env: str = None) -> Config:
 
     # Validate production config
     if isinstance(config, ProductionConfig):
-        if not config.BASE_RPC_URL:
-            raise ValueError("BASE_RPC_URL must be set in production")
+        if not config.AVAX_RPC_URL:
+            raise ValueError("AVAX_RPC_URL must be set in production")
         if not config.BACKEND_WALLET_PRIVATE_KEY:
             raise ValueError("BACKEND_WALLET_PRIVATE_KEY must be set in production")
         if not config.BACKEND_WALLET_ADDRESS:

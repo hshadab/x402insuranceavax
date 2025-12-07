@@ -134,7 +134,7 @@ zkengine = ZKEngineClient(config.ZKENGINE_BINARY_PATH, timeout=config.ZKENGINE_T
 
 # Blockchain
 blockchain = BlockchainClient(
-    rpc_url=config.BASE_RPC_URL,
+    rpc_url=config.AVAX_RPC_URL,
     usdc_address=config.USDC_CONTRACT_ADDRESS,
     private_key=config.BACKEND_WALLET_PRIVATE_KEY,
     max_gas_price_gwei=config.MAX_GAS_PRICE_GWEI,

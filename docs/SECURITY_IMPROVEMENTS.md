@@ -55,7 +55,7 @@ ZKENGINE_TIMEOUT=60
 BLOCKCHAIN_CONFIRMATION_TIMEOUT=120
 
 # Chain configuration
-CHAIN_ID=8453  # Base Mainnet (84532 for Sepolia testnet)
+CHAIN_ID=43114  # Avalanche C-Chain (431142 for Sepolia testnet)
 
 # CORS (restrict to your domain in production)
 CORS_ORIGINS=https://yourdomain.com
@@ -163,22 +163,22 @@ BLOCKCHAIN_CONFIRMATION_TIMEOUT=120
 
 ### 7. Configurable Chain ID
 
-**Issue**: Chain ID was hardcoded to 8453 (Base Mainnet) in EIP-712 signature verification.
+**Issue**: Chain ID was hardcoded to 43114 (Avalanche C-Chain) in EIP-712 signature verification.
 
 **Fix**: Made chain ID configurable to support different networks.
 
 **Configuration**:
 ```bash
-# Base Mainnet
-CHAIN_ID=8453
+# Avalanche C-Chain
+CHAIN_ID=43114
 
-# Base Sepolia (testnet)
-CHAIN_ID=84532
+# Avalanche Fuji (testnet)
+CHAIN_ID=431142
 ```
 
 **Automatic Defaults**:
-- Development: 84532 (Base Sepolia)
-- Production: 8453 (Base Mainnet)
+- Development: 431142 (Avalanche Fuji)
+- Production: 43114 (Avalanche C-Chain)
 
 ## Security Best Practices
 
@@ -213,12 +213,12 @@ CHAIN_ID=84532
 - [ ] Remove `.env` from git if previously committed
 - [ ] Set `ENV=production`
 - [ ] Set `DEBUG=false`
-- [ ] Configure `BASE_RPC_URL` with production RPC
+- [ ] Configure `AVAX_RPC_URL` with production RPC
 - [ ] Set wallet address and private key via environment variables (not .env file)
 - [ ] Set `PAYMENT_VERIFICATION_MODE=full`
 - [ ] Set `REQUIRE_CLAIM_AUTHENTICATION=true`
 - [ ] Configure `CORS_ORIGINS` with your actual domain
-- [ ] Set `CHAIN_ID=8453` for Base Mainnet
+- [ ] Set `CHAIN_ID=43114` for Avalanche C-Chain
 - [ ] Review and adjust rate limits based on expected traffic
 - [ ] Set up monitoring and alerting
 - [ ] Configure PostgreSQL (recommended over JSON files)

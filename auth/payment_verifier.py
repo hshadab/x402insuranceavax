@@ -40,7 +40,7 @@ class PaymentDetails:
 class PaymentVerifier:
     """Verify x402 payments with proper signature validation"""
 
-    def __init__(self, backend_address: str, usdc_address: str, nonce_storage_path: Optional[Path] = None, chain_id: int = 8453):
+    def __init__(self, backend_address: str, usdc_address: str, nonce_storage_path: Optional[Path] = None, chain_id: int = 43114):
         self.backend_address = Web3.to_checksum_address(backend_address)
         self.usdc_address = Web3.to_checksum_address(usdc_address)
         self.chain_id = chain_id
@@ -226,7 +226,7 @@ class PaymentVerifier:
             domain_data = {
                 "name": "x402 Payment",
                 "version": "1",
-                "chainId": self.chain_id,  # Configurable chain ID (Base Mainnet: 8453, Base Sepolia: 84532)
+                "chainId": self.chain_id,  # Configurable chain ID (Avalanche Mainnet: 43114, Avalanche Fuji: 43113)
             }
 
             # Define message structure

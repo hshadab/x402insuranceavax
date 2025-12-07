@@ -5,9 +5,9 @@ This guide walks you through deploying x402 Insurance to production.
 ## Prerequisites
 
 - Python 3.11 or 3.12
-- Access to Base Mainnet RPC (Alchemy recommended)
-- USDC on Base Mainnet for reserves
-- ETH on Base Mainnet for gas fees
+- Access to Avalanche C-Chain RPC (Alchemy recommended)
+- USDC on Avalanche C-Chain for reserves
+- ETH on Avalanche C-Chain for gas fees
 - (Optional) PostgreSQL database
 - (Optional) Redis for distributed rate limiting
 
@@ -36,8 +36,8 @@ HOST=0.0.0.0
 DATABASE_URL=postgresql://username:password@host:port/database
 
 # Blockchain (REQUIRED)
-BASE_RPC_URL=https://base-mainnet.g.alchemy.com/v2/YOUR_ALCHEMY_KEY
-USDC_CONTRACT_ADDRESS=0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913
+AVAX_RPC_URL=https://avax-mainnet.g.alchemy.com/v2/YOUR_ALCHEMY_KEY
+USDC_CONTRACT_ADDRESS=0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E
 BACKEND_WALLET_PRIVATE_KEY=0xYOUR_PRIVATE_KEY_HERE
 BACKEND_WALLET_ADDRESS=0xYOUR_WALLET_ADDRESS_HERE
 
@@ -198,7 +198,7 @@ import os
 load_dotenv('.env.production')
 
 blockchain = BlockchainClient(
-    rpc_url=os.getenv('BASE_RPC_URL'),
+    rpc_url=os.getenv('AVAX_RPC_URL'),
     usdc_address=os.getenv('USDC_CONTRACT_ADDRESS'),
     private_key=os.getenv('BACKEND_WALLET_PRIVATE_KEY')
 )
@@ -248,7 +248,7 @@ pytest tests/ -v --cov=. --cov-report=term --cov-report=html
 
 ```bash
 # Test with production config (but testnet)
-ENV=production BASE_RPC_URL=https://sepolia.base.org python3 test_e2e_flow.py
+ENV=production AVAX_RPC_URL=https://api.avax-test.network/ext/bc/C/rpc python3 test_e2e_flow.py
 ```
 
 ### Security Tests

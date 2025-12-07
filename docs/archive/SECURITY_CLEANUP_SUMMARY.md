@@ -119,7 +119,7 @@ ls -la ~/.bashrc ~/.bash_profile
 2. **Use Render dashboard for secrets**
    - Set `BACKEND_WALLET_PRIVATE_KEY` in Render Environment Variables
    - Set `BACKEND_WALLET_ADDRESS` in Render Environment Variables
-   - Set `BASE_RPC_URL` in Render Environment Variables
+   - Set `AVAX_RPC_URL` in Render Environment Variables
 
 3. **Generate wallets securely**
    - Use hardware wallets for production (Ledger, Trezor)

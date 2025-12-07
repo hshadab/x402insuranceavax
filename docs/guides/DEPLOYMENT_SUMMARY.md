@@ -111,7 +111,7 @@ See detailed guide in `PRODUCTION_SETUP.md`
 ENV=development
 BACKEND_WALLET_ADDRESS=0xYourAddress
 BACKEND_WALLET_PRIVATE_KEY=0xYourPrivateKey
-BASE_RPC_URL=https://sepolia.base.org  # Testnet
+AVAX_RPC_URL=https://api.avax-test.network/ext/bc/C/rpc  # Testnet
 ```
 
 ### Production Requirements
@@ -119,7 +119,7 @@ BASE_RPC_URL=https://sepolia.base.org  # Testnet
 ENV=production
 BACKEND_WALLET_ADDRESS=0xYourAddress
 BACKEND_WALLET_PRIVATE_KEY=0xYourPrivateKey
-BASE_RPC_URL=https://base-mainnet.g.alchemy.com/v2/YOUR_KEY
+AVAX_RPC_URL=https://avax-mainnet.g.alchemy.com/v2/YOUR_KEY
 
 # Required for production
 DATABASE_URL=postgresql://user:pass@host:port/db
@@ -185,7 +185,7 @@ curl https://your-domain.com/.well-known/agent-card.json
 - **Payment Verification**: < 100ms (full mode)
 - **Policy Creation**: < 200ms (without blockchain)
 - **Claim Processing**: 15-30s (includes zkEngine proof generation)
-- **Blockchain Refund**: 2-5s (Base Mainnet)
+- **Blockchain Refund**: 2-5s (Avalanche C-Chain)
 - **Rate Limit**: 200 requests/day, 50 requests/hour per IP
 
 ---

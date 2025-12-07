@@ -62,7 +62,7 @@ Returns complete service metadata including identity, capabilities, services, an
         "scheme": "exact",
         "network": "base",
         "maxAmountRequired": "1000",
-        "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+        "asset": "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E",
         "payTo": "0xba72eD...",
         "description": "Insurance premium",
         "maxTimeoutSeconds": 60
@@ -115,7 +115,7 @@ GET /api/pricing
     "network": "base",
     "token": {
       "symbol": "USDC",
-      "address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+      "address": "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E",
       "decimals": 6
     },
     "payTo": "0xba72eD..."
@@ -208,7 +208,7 @@ GET /api
         "scheme": "exact",
         "network": "base",
         "maxAmountRequired": "1000",
-        "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+        "asset": "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E",
         "payTo": "0xba72eD...",
         "description": "Insurance premium for micropayment protection",
         "mimeType": "application/json",
@@ -294,7 +294,7 @@ const payment = insuranceService.payment;
 // scheme: "exact"
 // network: "base"
 // maxAmountRequired: "1000"  // 0.001 USDC in smallest units
-// asset: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+// asset: "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E"
 // payTo: "0xba72eD..."
 
 // Extract schemas for validation
@@ -617,7 +617,7 @@ response = requests.post('/insure', json=data)
 #     "scheme": "exact",
 #     "network": "base",
 #     "amount": "100",
-#     "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+#     "asset": "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E",
 #     "pay_to": "0xba72eD...",
 #     "maxTimeoutSeconds": 60
 #   }
@@ -929,7 +929,7 @@ except TimeoutError:
 
 **x402 Payment:**
 - `scheme`: "exact" for fixed price
-- `network`: "base" or "base-sepolia"
+- `network`: "avalanche" or "avalanche-fuji"
 - `maxAmountRequired`: String integer in smallest units
 - `asset`: USDC contract address
 - `payTo`: Recipient wallet address

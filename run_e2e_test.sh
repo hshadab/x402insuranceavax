@@ -32,7 +32,7 @@ echo "(These will only be used for this test session and not saved)"
 echo ""
 
 # Prompt for credentials
-read -p "BASE_RPC_URL: " rpc_url
+read -p "AVAX_RPC_URL: " rpc_url
 read -p "BACKEND_WALLET_ADDRESS: " wallet_address
 read -sp "BACKEND_WALLET_PRIVATE_KEY: " private_key
 echo ""
@@ -49,10 +49,10 @@ echo "✓ Wallet: $wallet_address"
 echo ""
 
 # Export environment variables (only for this shell session)
-export BASE_RPC_URL="$rpc_url"
+export AVAX_RPC_URL="$rpc_url"
 export BACKEND_WALLET_ADDRESS="$wallet_address"
 export BACKEND_WALLET_PRIVATE_KEY="$private_key"
-export USDC_CONTRACT_ADDRESS="0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+export USDC_CONTRACT_ADDRESS="0x5425890298aed601595a70AB815c96711a31Bc65"  # Avalanche Fuji USDC
 export PAYMENT_VERIFICATION_MODE="simple"  # Use simple mode for testing
 export REQUIRE_CLAIM_AUTHENTICATION="false"  # Disable claim auth for testing
 export ENV="development"  # Use development mode
@@ -67,7 +67,7 @@ python3 test_e2e_real.py
 test_result=$?
 
 # Cleanup (unset sensitive variables)
-unset BASE_RPC_URL
+unset AVAX_RPC_URL
 unset BACKEND_WALLET_PRIVATE_KEY
 unset BACKEND_WALLET_ADDRESS
 

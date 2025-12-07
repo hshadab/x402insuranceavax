@@ -116,7 +116,7 @@
 │  │ DOMAIN (chainId separation - prevent replay)        │  │
 │  │  name:    "x402 Payment"                            │  │
 │  │  version: "1"                                       │  │
-│  │  chainId: 8453 (Base Mainnet)                       │  │
+│  │  chainId: 43114 (Avalanche C-Chain)                       │  │
 │  └─────────────────────────────────────────────────────┘  │
 │                                                             │
 │  ┌─────────────────────────────────────────────────────┐  │
@@ -254,10 +254,10 @@ Result: Easy testing without real keys
 ```
 FLASK_ENV = production
 PAYMENT_VERIFICATION_MODE = "full"    # Full EIP-712 verification
-BASE_RPC_URL = https://mainnet.base.org
+AVAX_RPC_URL = https://api.avax.network/ext/bc/C/rpc
 BACKEND_WALLET_ADDRESS = 0x...
 BACKEND_WALLET_PRIVATE_KEY = 0x...
-USDC_CONTRACT_ADDRESS = 0x833589fCD6eDb6E08f4c7C32D4f71b1566915a7d
+USDC_CONTRACT_ADDRESS = 0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E  # USDC on Avalanche
 
 Result: Production-grade security
         Real blockchain transactions

@@ -21,8 +21,8 @@ services:
       - DATABASE_URL=postgresql://x402user:x402pass@postgres:5432/x402insurance
 
       # Blockchain (set via .env file or environment variables)
-      - BASE_RPC_URL=${BASE_RPC_URL}
-      - USDC_CONTRACT_ADDRESS=${USDC_CONTRACT_ADDRESS:-0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913}
+      - AVAX_RPC_URL=${AVAX_RPC_URL}
+      - USDC_CONTRACT_ADDRESS=${USDC_CONTRACT_ADDRESS:-0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E}
       - BACKEND_WALLET_PRIVATE_KEY=${BACKEND_WALLET_PRIVATE_KEY}
       - BACKEND_WALLET_ADDRESS=${BACKEND_WALLET_ADDRESS}
 
@@ -47,7 +47,7 @@ services:
       - REQUIRE_CLAIM_AUTHENTICATION=${REQUIRE_CLAIM_AUTHENTICATION:-true}
 
       # Chain configuration
-      - CHAIN_ID=${CHAIN_ID:-8453}
+      - CHAIN_ID=${CHAIN_ID:-43114}
 
       # Monitoring (optional)
       - SENTRY_DSN=${SENTRY_DSN:-}

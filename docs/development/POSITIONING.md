@@ -88,7 +88,7 @@ We pay agent X USDC         → FROM OUR RESERVES (not merchant's)
 1. ✅ **Automated refunds** when merchants fail to deliver
 2. ✅ **Cryptographic proofs** of fraud via zkEngine (Nova/Arecibo SNARKs)
 3. ✅ **Public auditability** - anyone can verify proofs
-4. ✅ **Instant settlement** - USDC refunds on Base Mainnet
+4. ✅ **Instant settlement** - USDC refunds on Avalanche C-Chain
 
 ### Fraud Detection Rules
 
@@ -301,7 +301,7 @@ if response.status_code >= 500:
 - **Premium:** 1 USDC
 - **Max Coverage:** 100 USDC per policy
 - **Duration:** 24 hours
-- **Network:** Base Mainnet
+- **Network:** Avalanche C-Chain
 
 ### Production Pricing (Proposed)
 - **Tier 1 - Basic:** 10 USDC premium → 1,000 USDC coverage
@@ -319,7 +319,7 @@ if response.status_code >= 500:
 
 ### Technical Validation
 - ✅ zkEngine real SNARKs (Nova/Arecibo) working in production
-- ✅ Base Mainnet integration confirmed
+- ✅ Avalanche C-Chain integration confirmed
 - ✅ Official x402 Python middleware integrated
 - ✅ Public proof verification functional
 

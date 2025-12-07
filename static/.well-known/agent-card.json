@@ -3,7 +3,7 @@
   "agentCardVersion": "1.0",
   "identity": {
     "name": "x402 Insurance",
-    "description": "Zero-knowledge proof verified insurance against x402 merchant fraud. Protect AI agents' micropayment API calls with instant, cryptographically-verified refunds on Base Mainnet.",
+    "description": "Zero-knowledge proof verified insurance against x402 merchant fraud. Protect AI agents' micropayment API calls with instant, cryptographically-verified refunds on Avalanche C-Chain.",
     "provider": "x402 Insurance",
     "version": "1.0.0",
     "url": "https://your-domain.com",
@@ -15,7 +15,7 @@
     "zkProofs": true,
     "instantRefunds": true,
     "micropayments": true,
-    "networks": ["base"],
+    "networks": ["avalanche"],
     "protocols": ["x402", "a2a"],
     "features": [
       "Zero-knowledge fraud verification",
@@ -35,9 +35,9 @@
       "x402Required": true,
       "payment": {
         "scheme": "exact",
-        "network": "base",
+        "network": "avalanche",
         "maxAmountRequired": "1000",
-        "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+        "asset": "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E",
         "payTo": "0xf36B80afFb2e41418874FfA56B069f1Fe671FC35",
         "description": "Insurance premium (1% of coverage amount)",
         "mimeType": "application/json",
@@ -346,7 +346,7 @@
     "min_coverage": 0.01,
     "max_coverage": 0.1,
     "currency": "USDC",
-    "network": "base",
+    "network": "avalanche",
     "policy_duration_hours": 24,
     "examples": [
       {
@@ -391,11 +391,11 @@
     "trustless": "Math proves fraud, not human judgment"
   },
   "blockchain": {
-    "network": "base",
-    "chain_id": 8453,
-    "usdc_contract": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+    "network": "avalanche",
+    "chain_id": 43114,
+    "usdc_contract": "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E",
     "backend_wallet": "0xf36B80afFb2e41418874FfA56B069f1Fe671FC35",
-    "explorer": "https://basescan.org"
+    "explorer": "https://snowtrace.io"
   },
   "links": {
     "documentation": "https://your-domain.com/docs",

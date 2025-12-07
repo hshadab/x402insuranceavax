@@ -74,8 +74,8 @@ PAYMENT_MAX_AGE_SECONDS=300              # Max age 5 minutes
 # Blockchain Config
 BACKEND_WALLET_ADDRESS=0x...             # Payment recipient
 BACKEND_WALLET_PRIVATE_KEY=0x...         # For USDC transfers
-BASE_RPC_URL=https://mainnet.base.org   # Base Mainnet RPC
-USDC_CONTRACT_ADDRESS=0x833589fCD6...    # USDC on Base
+AVAX_RPC_URL=https://api.avax.network/ext/bc/C/rpc   # Avalanche C-Chain RPC
+USDC_CONTRACT_ADDRESS=0xB97EF9Ef87...    # USDC on Avalanche
 
 # Premium Model
 PREMIUM_PERCENTAGE=0.01                  # 1% of coverage
@@ -230,7 +230,7 @@ Before going live:
 - [ ] Set PAYMENT_VERIFICATION_MODE=full
 - [ ] Set BACKEND_WALLET_ADDRESS
 - [ ] Set BACKEND_WALLET_PRIVATE_KEY
-- [ ] Set BASE_RPC_URL to mainnet
+- [ ] Set AVAX_RPC_URL to mainnet
 - [ ] Set USDC_CONTRACT_ADDRESS to mainnet USDC
 - [ ] Create data/ directory for nonce_cache.json
 - [ ] Test with real signed payment

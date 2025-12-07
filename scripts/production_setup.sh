@@ -63,7 +63,7 @@ if [ ! -f ".env" ]; then
         echo -e "${YELLOW}⚠️  Please edit .env with your production values before continuing${NC}"
         echo ""
         echo "Required values:"
-        echo "  - BASE_RPC_URL (Alchemy or Infura)"
+        echo "  - AVAX_RPC_URL (Alchemy or Infura)"
         echo "  - BACKEND_WALLET_PRIVATE_KEY (your wallet's private key)"
         echo "  - BACKEND_WALLET_ADDRESS (your wallet's address)"
         echo "  - DATABASE_URL (PostgreSQL - optional)"
@@ -107,7 +107,7 @@ from blockchain import BlockchainClient
 
 try:
     blockchain = BlockchainClient(
-        rpc_url=os.getenv('BASE_RPC_URL'),
+        rpc_url=os.getenv('AVAX_RPC_URL'),
         usdc_address=os.getenv('USDC_CONTRACT_ADDRESS'),
         private_key=os.getenv('BACKEND_WALLET_PRIVATE_KEY')
     )
@@ -116,10 +116,10 @@ try:
         print("✅ Connected to blockchain")
         chain_id = blockchain.w3.eth.chain_id
         print(f"   Chain ID: {chain_id}")
-        if chain_id == 8453:
-            print("   Network: Base Mainnet")
-        elif chain_id == 84532:
-            print("   Network: Base Sepolia (Testnet)")
+        if chain_id == 43114:
+            print("   Network: Avalanche Mainnet")
+        elif chain_id == 43113:
+            print("   Network: Avalanche Fuji (Testnet)")
         else:
             print(f"   Network: Unknown (Chain ID {chain_id})")
     else:
@@ -145,7 +145,7 @@ from blockchain import BlockchainClient
 
 try:
     blockchain = BlockchainClient(
-        rpc_url=os.getenv('BASE_RPC_URL'),
+        rpc_url=os.getenv('AVAX_RPC_URL'),
         usdc_address=os.getenv('USDC_CONTRACT_ADDRESS'),
         private_key=os.getenv('BACKEND_WALLET_PRIVATE_KEY')
     )

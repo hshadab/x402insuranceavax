@@ -13,11 +13,11 @@
 - **Evidence**: Live claims show real proof generation times
 
 ### ✅ USDC Refunds (REAL)
-- **Network**: Base Mainnet (Chain ID: 8453)
+- **Network**: Avalanche C-Chain (Chain ID: 43114)
 - **Wallet**: `0xA7c563342543fBa03707EEa79fb5Aaad80228bC5`
-- **RPC**: Public Base Mainnet endpoint
-- **Transactions**: Multiple verified USDC transfers on Basescan
-- **Example**: https://basescan.org/tx/0x29c71c423d09ca6101456e458b68022008b541ef78fa9cc76b399e45a3497a62
+- **RPC**: Public Avalanche C-Chain endpoint
+- **Transactions**: Multiple verified USDC transfers on Snowtrace
+- **Example**: https://snowtrace.io/tx/0x29c71c423d09ca6101456e458b68022008b541ef78fa9cc76b399e45a3497a62
 
 ### ✅ Payment Verification (REAL)
 - **Mode**: Full EIP-712 signature verification
@@ -43,8 +43,8 @@
 ENV=production
 FLASK_ENV=production
 PAYMENT_VERIFICATION_MODE=full
-BASE_RPC_URL=https://base-mainnet.g.alchemy.com/v2/[key]
-USDC_CONTRACT_ADDRESS=0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913
+AVAX_RPC_URL=https://avax-mainnet.g.alchemy.com/v2/[key]
+USDC_CONTRACT_ADDRESS=0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E
 BACKEND_WALLET_ADDRESS=0xA7c563342543fBa03707EEa79fb5Aaad80228bC5
 ZKENGINE_BINARY_PATH=./zkengine/fraud_detector
 ```
@@ -84,7 +84,7 @@ ZKENGINE_BINARY_PATH=./zkengine/fraud_detector
 - **Environment**: Production
 - **Payment Verification**: Full EIP-712
 - **zkEngine**: Real proofs (Nova/Spartan)
-- **Blockchain**: Base Mainnet
+- **Blockchain**: Avalanche C-Chain
 - **USDC Refunds**: Live and operational
 
 ### Server Startup Log
@@ -101,7 +101,7 @@ ZKENGINE_BINARY_PATH=./zkengine/fraud_detector
 Everything is production-ready:
 
 1. ❌ **No mock proofs** - Real Nova/Spartan SNARKs
-2. ❌ **No mock transactions** - Real USDC on Base Mainnet
+2. ❌ **No mock transactions** - Real USDC on Avalanche C-Chain
 3. ❌ **No mock signatures** - Full EIP-712 validation
 4. ❌ **No mock data** - Real policies and claims
 
@@ -119,7 +119,7 @@ The system is fully operational. To scale:
 To verify the system is working:
 
 1. **Check zkEngine**: `./zkengine/fraud_detector 503 0` (from `/tmp/zkEngine_dev`)
-2. **Check transactions**: View any TX hash on https://basescan.org
+2. **Check transactions**: View any TX hash on https://snowtrace.io
 3. **Check server**: Start server and see "Using FULL payment verification" log
 4. **Check claims**: View `data/claims.json` for real proof generation times
 
@@ -127,7 +127,7 @@ To verify the system is working:
 
 ✅ **100% Production Ready**
 - Real zero-knowledge proofs
-- Real USDC refunds on Base Mainnet
+- Real USDC refunds on Avalanche C-Chain
 - Full EIP-712 payment verification
 - Live production data
 - Verified blockchain transactions

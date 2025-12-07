@@ -6,7 +6,7 @@ This guide explains how to deploy the x402 Insurance Service to Render.
 
 1. A Render account (sign up at https://render.com)
 2. Your code in a Git repository (GitHub, GitLab, or Bitbucket)
-3. Base Mainnet wallet with:
+3. Avalanche C-Chain wallet with:
    - Private key
    - Wallet address
    - Some ETH for gas fees (~0.005 ETH recommended)
@@ -48,7 +48,7 @@ In the Render dashboard, go to "Environment" and add these SECRET variables:
 ```
 BACKEND_WALLET_PRIVATE_KEY=0xYOUR_PRIVATE_KEY_HERE
 BACKEND_WALLET_ADDRESS=0xYOUR_WALLET_ADDRESS_HERE
-BASE_RPC_URL=https://base-mainnet.g.alchemy.com/v2/YOUR_ALCHEMY_KEY
+AVAX_RPC_URL=https://avax-mainnet.g.alchemy.com/v2/YOUR_ALCHEMY_KEY
 ```
 
 **Optional:**
@@ -106,7 +106,7 @@ The build command in `render.yaml` does:
 - **Cost:** $7/month
 - **Good for:** Production with moderate traffic
 
-### Blockchain Costs (Base Mainnet)
+### Blockchain Costs (Avalanche C-Chain)
 - **Gas per refund:** ~0.000001 ETH (~$0.003 at 2500 ETH/USD)
 - **Example:** 1000 refunds = 0.001 ETH (~$3)
 - **USDC for refunds:** Depends on coverage (e.g., 100 refunds at 0.01 USDC = 1 USDC)
@@ -176,7 +176,7 @@ The build command in `render.yaml` does:
 
 **Error: "Transaction failed: insufficient funds"**
 - Not enough ETH for gas or USDC for refunds
-- Solution: Fund wallet on Base Mainnet
+- Solution: Fund wallet on Avalanche C-Chain
 
 ### Health Check Failures
 
@@ -193,8 +193,8 @@ If health check fails:
    - Use Render environment variables in production
 
 2. **Use separate wallets**
-   - Development wallet (Base Sepolia testnet)
-   - Production wallet (Base Mainnet)
+   - Development wallet (Avalanche Fuji testnet)
+   - Production wallet (Avalanche C-Chain)
    - Never use same private key
 
 3. **Limit wallet funds**
@@ -248,7 +248,7 @@ For dashboard UI:
 After successful deployment:
 1. Test with micropayment insurance policy (0.001 USDC)
 2. Submit test claim with fraud proof
-3. Verify USDC refund on Base Mainnet
+3. Verify USDC refund on Avalanche C-Chain
 4. Monitor logs and metrics
 5. Set up custom domain (optional)
 6. Configure SSL (automatic on Render)

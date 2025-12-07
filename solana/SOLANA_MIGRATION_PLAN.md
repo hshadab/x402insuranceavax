@@ -22,8 +22,8 @@
 ## 2. Technical Migration Overview
 
 ### Current Stack (Base)
-- Network: Base Mainnet
-- Token: USDC (0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913)
+- Network: Avalanche C-Chain
+- Token: USDC (0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E)
 - Smart Contract Language: Solidity (EVM)
 - RPC: Alchemy Base RPC
 - Payment Protocol: x402 with EIP-712 signatures

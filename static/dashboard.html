@@ -811,7 +811,7 @@
     <!-- Hero Section -->
     <div class="hero">
         <h1 class="hero-title">x402 Insurance</h1>
-        <h2 class="hero-subtitle">USDC Refunds for AI Agents</h2>
+        <h2 class="hero-subtitle">USDC Refunds for AI Agents on Avalanche</h2>
         <p class="hero-description">
             Zero-knowledge proof verified insurance for API failures and downtime. Protect your AI agents when services fail with publicly verifiable proofs powered by <a href="https://www.novanet.xyz/" target="_blank" style="color: var(--accent-primary); text-decoration: none;">NovaNet</a>.
         </p>
@@ -826,7 +826,7 @@
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
                 </svg>
-                Base Mainnet
+                Avalanche C-Chain
             </div>
             <div class="badge">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -855,7 +855,7 @@
                     System Status
                 </div>
                 <div class="card-value" id="systemStatus">Operational</div>
-                <div class="card-label">Base Mainnet Connected</div>
+                <div class="card-label">Avalanche C-Chain Connected</div>
             </div>
 
             <div class="card">
@@ -963,7 +963,7 @@
             </div>
             <div class="stats-grid">
                 <div class="stat-box">
-                    <div class="stat-value" id="chainId">8453</div>
+                    <div class="stat-value" id="chainId">43114</div>
                     <div class="stat-label">Chain ID</div>
                 </div>
                 <div class="stat-box">
@@ -981,8 +981,8 @@
             </div>
             <div class="code-block" style="margin-top: 20px;">
 Wallet: <span id="walletAddress">Loading...</span>
-Network: Base Mainnet
-USDC: 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913
+Network: Avalanche C-Chain
+USDC: 0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E
             </div>
         </div>
 
@@ -1006,12 +1006,12 @@ USDC: 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913
                 </p>
                 <p style="margin-bottom: 15px;">
                     <strong style="color: var(--accent-primary);">3. Refund + Proof Publication</strong><br/>
-                    Two on-chain transactions on Base Mainnet:
+                    Two on-chain transactions on Avalanche C-Chain:
                     <br/>• <strong>💰 Refund TX:</strong> Standard USDC transfer to agent
                     <br/>• <strong>🔐 Proof TX:</strong> Proof data published for public audit (claim_id, proof_hash, public_inputs)
                 </p>
                 <p style="font-size: 12px; opacity: 0.8; margin-top: 15px; padding: 10px; background: rgba(0, 212, 255, 0.05); border-radius: 8px;">
-                    💡 <strong>Three On-Chain Transactions:</strong> Premium payment (x402), Refund (USDC), Proof publication (data). All viewable on Basescan.
+                    💡 <strong>Three On-Chain Transactions:</strong> Premium payment (x402), Refund (USDC), Proof publication (data). All viewable on Snowtrace.
                 </p>
             </div>
             <div class="code-block" style="margin-top: 20px;">
@@ -1265,12 +1265,12 @@ def detect_failure(http_status, body_length):
                                     🔐 View Proof Details
                                 </button>
                                 ${claim.refund_tx_hash ? `
-                                <button class="timeline-btn timeline-btn-secondary" onclick="window.open('https://basescan.org/tx/${claim.refund_tx_hash}', '_blank')">
+                                <button class="timeline-btn timeline-btn-secondary" onclick="window.open('https://snowtrace.io/tx/${claim.refund_tx_hash}', '_blank')">
                                     💰 Refund TX
                                 </button>
                                 ` : ''}
                                 ${claim.proof_tx_hash ? `
-                                <button class="timeline-btn timeline-btn-secondary" onclick="window.open('https://basescan.org/tx/${claim.proof_tx_hash}', '_blank')">
+                                <button class="timeline-btn timeline-btn-secondary" onclick="window.open('https://snowtrace.io/tx/${claim.proof_tx_hash}', '_blank')">
                                     🔐 Proof TX
                                 </button>
                                 ` : ''}

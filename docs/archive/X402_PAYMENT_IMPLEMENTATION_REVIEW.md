@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-The x402 Insurance codebase implements payment verification for the x402 protocol with **production-ready security features** on Base Mainnet. The implementation uses **EIP-712 structured data signatures** for Ethereum/Base compatibility, with plans to extend to **Solana using ed25519** signatures.
+The x402 Insurance codebase implements payment verification for the x402 protocol with **production-ready security features** on Avalanche C-Chain. The implementation uses **EIP-712 structured data signatures** for Ethereum/Base compatibility, with plans to extend to **Solana using ed25519** signatures.
 
 **Overall Assessment: GOOD** ✅
 - Implements proper signature verification (EIP-712)
@@ -73,7 +73,7 @@ The implementation follows the **EIP-712 Typed Structured Data** specification w
 domain_data = {
     "name": "x402 Payment",
     "version": "1",
-    "chainId": 8453,  # Base Mainnet
+    "chainId": 43114,  # Avalanche C-Chain
 }
 ```
 
@@ -391,7 +391,7 @@ is_valid = recovered_address.lower() == payer.lower()
 | Payment Header Format | Comma-separated key=value | ⚠️ (Non-standard) |
 | Signature Verification | EIP-712 signature recovery | ✅ |
 | Amount Validation | Exact amount matching | ✅ |
-| Network Support | Base Mainnet (EVM) | ✅ |
+| Network Support | Avalanche C-Chain (EVM) | ✅ |
 
 **Issue:** Payment header format is custom (comma-separated) rather than standard x402 format. This is noted in the code comment: "Simple comma-separated format: key=value,key=value"
 
@@ -444,8 +444,8 @@ PAYMENT_MAX_AGE_SECONDS = 300         # Max payment age (5 minutes)
 # Blockchain Configuration
 BACKEND_WALLET_ADDRESS = os.getenv("BACKEND_WALLET_ADDRESS")
 BACKEND_WALLET_PRIVATE_KEY = os.getenv("BACKEND_WALLET_PRIVATE_KEY")
-BASE_RPC_URL = "https://sepolia.base.org"
-USDC_CONTRACT_ADDRESS = "0x036CbD53842c5426634e7929541eC2318f3dCF7e"
+AVAX_RPC_URL = "https://api.avax-test.network/ext/bc/C/rpc"
+USDC_CONTRACT_ADDRESS = "0x5425890298aed601595a70AB815c96711a31Bc65"
 
 # Premium Calculation
 PREMIUM_PERCENTAGE = 0.01  # 1% of coverage
@@ -460,7 +460,7 @@ class DevelopmentConfig(Config):
 
 class ProductionConfig(Config):
     PAYMENT_VERIFICATION_MODE = "full"    # Require EIP-712 signatures
-    # Validates BASE_RPC_URL, BACKEND_WALLET_PRIVATE_KEY, BACKEND_WALLET_ADDRESS
+    # Validates AVAX_RPC_URL, BACKEND_WALLET_PRIVATE_KEY, BACKEND_WALLET_ADDRESS
 ```
 
 ---
@@ -556,7 +556,7 @@ Example:
    - Improvement: Could provide more specific error messages to agent
 
 6. **Chain ID Hardcoded**
-   - Domain includes `chainId: 8453` (Base Mainnet)
+   - Domain includes `chainId: 43114` (Avalanche C-Chain)
    - Limitation: Not flexible for testnet/mainnet switching
    - Risk: Low (configuration-driven in practice)
    - Mitigation: Could add to environment variables
@@ -723,7 +723,7 @@ class TestPaymentDetails:
 
 The x402 Insurance payment implementation demonstrates **production-grade security practices** with proper EIP-712 signature verification, replay attack prevention, and comprehensive validation logic. The system follows x402 protocol standards while maintaining clean, maintainable Python code.
 
-**Ready for Production on Base Mainnet: YES ✅**
+**Ready for Production on Avalanche C-Chain: YES ✅**
 **Solana Support Status: Planned (Hackathon Deadline: Nov 11)** 🚧
 
 The main improvement areas are:

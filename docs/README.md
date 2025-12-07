@@ -9,7 +9,7 @@
 
 - **[DEPLOYMENT.md](guides/DEPLOYMENT.md)** - Deployment instructions
 - **[PRODUCTION_SETUP.md](guides/PRODUCTION_SETUP.md)** - Production configuration guide
-- **[WALLET_SETUP_GUIDE.md](guides/WALLET_SETUP_GUIDE.md)** - Setting up Base Mainnet wallet
+- **[WALLET_SETUP_GUIDE.md](guides/WALLET_SETUP_GUIDE.md)** - Setting up Avalanche C-Chain wallet
 - **[DEPLOYMENT_CHECKLIST.md](guides/DEPLOYMENT_CHECKLIST.md)** - Pre-deployment checklist
 - **[DEPLOYMENT_SUMMARY.md](guides/DEPLOYMENT_SUMMARY.md)** - Deployment summary
 
