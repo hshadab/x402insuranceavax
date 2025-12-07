@@ -294,10 +294,6 @@ echo "your-rpc-url" | docker secret create rpc_url -
 docker stack deploy -c docker-compose.yml x402
 ```
 
-### Using Kubernetes
-
-See `k8s/` directory for Kubernetes manifests (if you create them).
-
 ## Resource Limits
 
 Default resource limits in docker-compose.yml:
@@ -348,6 +344,53 @@ docker-compose logs -f app
 # If you add database migrations in the future:
 docker-compose exec app python migrate.py
 ```
+
+---
+
+## Docker Hub Pre-Built Images
+
+Instead of building on every deploy, use pre-built images for faster deployments.
+
+### Option 1: GitHub Actions (Recommended)
+
+1. **Create Docker Hub account** at https://hub.docker.com/signup
+
+2. **Create Access Token**
+   - Go to https://hub.docker.com/settings/security
+   - Click "New Access Token"
+   - Name: `github-actions`
+   - Permissions: `Read, Write, Delete`
+
+3. **Add GitHub Secrets**
+   - Go to your GitHub repo Settings → Secrets → Actions
+   - Add `DOCKER_USERNAME` and `DOCKER_PASSWORD`
+
+4. **Push to GitHub** - GitHub Actions will build and push automatically
+
+5. **Configure Render/deployment** to use `docker.io/yourusername/x402insurance:latest`
+
+### Option 2: Build Locally
+
+```bash
+# Login to Docker Hub
+docker login
+
+# Build and push
+./scripts/build-and-push.sh
+
+# Or manually:
+docker build -f Dockerfile.render -t yourusername/x402insurance:latest --platform linux/amd64 .
+docker push yourusername/x402insurance:latest
+```
+
+### Deployment Time Comparison
+
+| Method | First Deploy | Subsequent Deploys |
+|--------|--------------|-------------------|
+| Build on Render | 8-10 min | 5-7 min |
+| Pre-built Image | 30-60 sec | 30-60 sec |
+
+---
 
 ## Additional Resources
 
