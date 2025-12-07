@@ -192,25 +192,113 @@ Every insurance flow involves **three on-chain transactions** on Avalanche C-Cha
 
 ## Quick Start
 
+### Prerequisites
+
+Before running the insurance service, you'll need:
+
+1. **Python 3.10+** installed on your system
+2. **Funded Avalanche Wallet** with:
+   - **AVAX** for gas fees (0.1 AVAX recommended for testing)
+   - **USDC** for paying out claims (minimum 1 USDC recommended)
+3. **RPC Access** to Avalanche network (Alchemy, Infura, or public RPC)
+
+### Getting Testnet Funds (Avalanche Fuji)
+
+For development and testing, use the Avalanche Fuji testnet:
+
+1. **Get test AVAX:**
+   - Visit [Avalanche Fuji Faucet](https://faucet.avax.network/)
+   - Enter your wallet address
+   - Receive free testnet AVAX
+
+2. **Get test USDC:**
+   - Use [Avalanche Fuji USDC Faucet](https://faucet.circle.com/) (select Avalanche Fuji)
+   - Or swap testnet AVAX for USDC on testnet DEXs
+
+### Wallet Setup
+
+1. **Create a new wallet** (recommended for testing):
+   ```bash
+   # Using cast (foundry)
+   cast wallet new
+
+   # Or use MetaMask and export private key
+   ```
+
+2. **Add Avalanche Fuji to MetaMask:**
+   - Network Name: `Avalanche Fuji C-Chain`
+   - RPC URL: `https://api.avax-test.network/ext/bc/C/rpc`
+   - Chain ID: `43113`
+   - Currency: `AVAX`
+   - Explorer: `https://testnet.snowtrace.io`
+
+3. **Fund your wallet** with testnet AVAX and USDC (see above)
+
+### Installation
+
 ```bash
-# 1. Install dependencies
-python -m venv venv && source venv/bin/activate
+# 1. Clone the repository
+git clone https://github.com/hshadab/x402insuranceavax.git
+cd x402insuranceavax
+
+# 2. Create virtual environment and install dependencies
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 
-# 2. Configure environment (Avalanche Fuji recommended for dev)
-# Copy .env.example to .env and set values:
-#   AVAX_RPC_URL=...           # use testnet for development
-#   USDC_CONTRACT_ADDRESS=...
-#   BACKEND_WALLET_PRIVATE_KEY=... (dev only)
-#   BACKEND_WALLET_ADDRESS=...
-#   PREMIUM_PERCENTAGE=0.01
-#   MAX_COVERAGE_USDC=0.1
+# 3. Configure environment
+cp .env.example .env
+# Edit .env with your values (see below)
 
-# 3. Run server (mock zkEngine and minimal x402 verification)
+# 4. Run the server
 python server.py
 ```
 
+### Environment Configuration
+
+Edit your `.env` file with these required values:
+
+```bash
+# Avalanche Fuji Testnet (for development)
+AVAX_RPC_URL=https://api.avax-test.network/ext/bc/C/rpc
+CHAIN_ID=43113
+
+# USDC Contract Address
+USDC_CONTRACT_ADDRESS=0x5425890298aed601595a70AB815c96711a31Bc65  # Fuji USDC
+
+# Your Backend Wallet (must have AVAX + USDC)
+BACKEND_WALLET_ADDRESS=0xYourWalletAddress
+BACKEND_WALLET_PRIVATE_KEY=0xYourPrivateKey  # ⚠️ Never commit this!
+
+# Insurance Parameters
+PREMIUM_PERCENTAGE=0.01    # 1% premium
+MAX_COVERAGE_USDC=0.1      # Max $0.10 per policy
+```
+
+### For Production (Avalanche Mainnet)
+
+```bash
+# Avalanche Mainnet
+AVAX_RPC_URL=https://api.avax.network/ext/bc/C/rpc
+CHAIN_ID=43114
+
+# Mainnet USDC
+USDC_CONTRACT_ADDRESS=0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E
+```
+
 Server runs on **http://localhost:8000**
+
+### Verify Setup
+
+After starting the server, check the health endpoint:
+```bash
+curl http://localhost:8000/health?full=true
+```
+
+You should see:
+- `blockchain.status: "connected"`
+- `blockchain.usdc_balance: "X.XX"` (your USDC balance)
+- `blockchain.avax_balance: "X.XX"` (your AVAX balance)
 
 📖 **Full Documentation:** See `AGENT_DISCOVERY.md`, `DEPLOYMENT.md` and other guides
 
